@@ -54,3 +54,16 @@ Product spec: `./PRODUCT.md`
 - Follow-up:
 ```
 
+## Spec ID Examples
+
+Use `specs/<source>-<id>-<short-slug>/`.
+
+```text
+specs/gh-123-open-file-tilde/
+specs/linear-app-1066-agent-autonomy/
+specs/jira-core-42-auth-retry/
+specs/rfc-0001-repo-governance/
+specs/adhoc-20260430-tdd-bootstrap/
+```
+
+See `references/spec-id-policy.md` for the full policy.

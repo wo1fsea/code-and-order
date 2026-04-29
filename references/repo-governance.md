@@ -4,11 +4,12 @@
 
 Prefer a small number of clear layers:
 
-1. `AGENTS.md` for agent-facing operating rules.
-2. `CONTRIBUTING.md` for contributor flow and review expectations.
-3. `specs/` for substantial feature design and implementation plans.
-4. `.github/` templates for issue and pull request intake.
-5. `docs/governance/` for longer checklists that should not crowd the main instructions.
+1. `AGENTS.md` as the canonical router for all coding agents.
+2. Thin adapters (`CLAUDE.md`, `GEMINI.md`, `.github/copilot-instructions.md`) that import or point to `AGENTS.md`.
+3. `docs/governance/` for detailed workflows and checklists.
+4. `specs/` for substantial feature design and implementation plans.
+5. `.github/` templates for issue and pull request intake.
+6. `CONTRIBUTING.md` for public contributor flow and review expectations when the repo is open to contributors.
 
 ## Good Governance Properties
 
@@ -17,10 +18,14 @@ Prefer a small number of clear layers:
 - Current: rules are updated in the same change as workflow changes.
 - Minimal: rules avoid ceremony for simple changes.
 - Verifiable: important behavior maps to tests or manual validation.
+- Routed: `AGENTS.md` points to the current workflow files without duplicating them.
 
 ## Common Smells
 
 - The repo has several instruction files that contradict each other.
+- `AGENTS.md` becomes a long handbook instead of a routing file.
+- Claude, Gemini, or Copilot adapter files copy rules that belong in `docs/governance/`.
+- A governance file was added, moved, or renamed without updating `AGENTS.md`.
 - Specs describe implementation before product behavior is agreed.
 - Pull requests require checkboxes no one actually uses.
 - Agent rules mention stale commands or old directory names.
@@ -33,4 +38,3 @@ Prefer a small number of clear layers:
 - `ready-to-implement`: implementation can begin.
 - `needs-mocks`: UI work is blocked on design artifacts.
 - `blocked`: an external dependency or decision is missing.
-

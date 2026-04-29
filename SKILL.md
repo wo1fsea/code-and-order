@@ -9,10 +9,38 @@ Use this skill to help a repository become easier for humans and coding agents t
 
 The goal is lightweight governance: enough rules to reduce ambiguity, preserve decisions, and make validation repeatable, without turning the repo into a process shrine.
 
+## Default Design
+
+Use this governance shape unless the repo already has a stronger local convention:
+
+```text
+AGENTS.md                         # canonical router, not a long handbook
+CLAUDE.md                         # thin adapter pointing to AGENTS.md
+GEMINI.md                         # thin adapter pointing to AGENTS.md
+.github/copilot-instructions.md   # thin Copilot adapter pointing to AGENTS.md
+docs/governance/
+  README.md
+  agent-context.md
+  development-workflow.md
+  spec-workflow.md
+  spec-id-policy.md
+  tdd-workflow.md
+  validation-workflow.md
+  review-workflow.md
+  governance-maintenance.md
+specs/
+  README.md
+  <spec-id>/
+    PRODUCT.md
+    TECH.md
+```
+
+`AGENTS.md` is the canonical entry point, but it should stay short. It routes task types to the detailed governance files. Do not duplicate the detailed workflow text into `AGENTS.md` or the adapter files.
+
 ## Workflow
 
 1. Inspect the existing repository before proposing rules.
-   - Look for `AGENTS.md`, `CLAUDE.md`, `WARP.md`, `.cursor/rules`, `.github/`, `docs/`, `specs/`, `CONTRIBUTING.md`, test commands, build commands, and project-specific scripts.
+   - Look for `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, `WARP.md`, `.cursor/rules`, `.github/copilot-instructions.md`, `.github/instructions/`, `.github/`, `docs/`, `specs/`, `CONTRIBUTING.md`, test commands, build commands, and project-specific scripts.
    - Read existing instructions first and preserve their intent.
 2. Classify the current governance state.
    - Missing: no clear agent or contributor instructions.
@@ -20,43 +48,51 @@ The goal is lightweight governance: enough rules to reduce ambiguity, preserve d
    - Heavy: rules exist but create unnecessary ceremony.
    - Healthy: rules are concise, current, and connected to validation.
 3. Choose the smallest useful intervention.
-   - Create or update `AGENTS.md` when agents need repo-local instructions.
+   - Create or update `AGENTS.md` as a router when agents need repo-local instructions.
+   - Put detailed rules in `docs/governance/`.
+   - Create thin adapter files only when a tool expects them.
    - Add a `specs/` workflow only for ambiguous or cross-module work.
    - Add templates or checklists only when they remove repeated judgment calls.
-   - Move raw research and long examples into references rather than bloating the main rule file.
 4. Separate product intent from implementation planning.
    - `PRODUCT.md`: user/API-visible behavior, testable invariants, goals, non-goals, open questions.
    - `TECH.md`: current code context, proposed changes, validation plan, risks, follow-ups.
-5. Tie every rule to a decision point.
+5. Use concrete spec ids.
+   - Preferred shape: `specs/<source>-<id>-<short-slug>/`.
+   - Examples: `gh-123-open-file-tilde`, `linear-app-1066-agent-autonomy`, `rfc-0001-repo-governance`, `adhoc-20260430-tdd-bootstrap`.
+   - Read `references/spec-id-policy.md` before inventing a new policy.
+6. Treat TDD as a workflow, not a slogan.
+   - Product behavior -> test plan -> red -> green -> refactor -> broaden -> validate -> record.
+   - Read `references/tdd-workflow.md` when defining or auditing TDD rules.
+7. Tie every rule to a decision point.
    - A good rule tells the next human or agent what to do differently.
    - Delete or compress rules that only restate common sense.
-6. Validate the result.
+8. Maintain the router.
+   - When adding, deleting, renaming, or moving governance files, update `AGENTS.md` in the same change.
+   - When changing which workflow applies to a task type, update the `AGENTS.md` governance map in the same change.
+9. Validate the result.
    - Confirm links and paths work.
    - Confirm setup/test commands are discoverable.
    - Confirm the workflow says when to skip ceremony.
    - Summarize what changed and what remains intentionally undecided.
 
-## Suggested File Set
+## Initialization Modes
 
-Use this as a menu, not a mandate.
+Use `scripts/init_governance.py` for deterministic starter files:
 
-```text
-AGENTS.md
-CONTRIBUTING.md
-specs/
-  <issue-or-feature-id>/
-    PRODUCT.md
-    TECH.md
-docs/
-  governance/
-    review-checklist.md
-    validation-checklist.md
-.github/
-  ISSUE_TEMPLATE/
-  pull_request_template.md
+```bash
+python scripts/init_governance.py . \
+  --suite universal \
+  --tdd strict \
+  --spec-id rfc-0001-initial-governance
 ```
 
-For small repos, start with only `AGENTS.md`.
+Modes:
+
+- `--suite minimal`: `AGENTS.md`, core governance docs, and starter specs.
+- `--suite universal`: minimal plus `CLAUDE.md`, `GEMINI.md`, `.github/copilot-instructions.md`, and pull request template.
+- `--tdd off`: no TDD-specific workflow.
+- `--tdd standard`: TDD guidance is recommended.
+- `--tdd strict`: TDD evidence is expected for behavior changes.
 
 ## When To Add Specs
 
@@ -74,5 +110,7 @@ Skip specs for narrow bug fixes, mechanical refactors, dependency bumps, or obvi
 
 - Read `references/repo-governance.md` when designing or auditing a repo governance layout.
 - Read `references/spec-templates.md` when creating `PRODUCT.md` / `TECH.md` templates.
+- Read `references/spec-id-policy.md` when defining or reviewing spec id format.
+- Read `references/tdd-workflow.md` when adding TDD expectations.
+- Read `references/universal-agent-init.md` when initializing Codex, Copilot, Claude, and Gemini context files together.
 - Use `scripts/init_governance.py` when a repo needs a deterministic starter structure.
-
