@@ -1,0 +1,7 @@
+interface:
+  display_name: "Code & Order"
+  short_description: "Set up human-agent repo governance."
+  default_prompt: "Use $code-and-order to initialize lightweight governance rules for this repository."
+policy:
+  allow_implicit_invocation: true
+
