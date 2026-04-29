@@ -61,7 +61,9 @@ specs/
    - Examples: `gh-123-open-file-tilde`, `linear-app-1066-agent-autonomy`, `rfc-0001-repo-governance`, `adhoc-20260430-tdd-bootstrap`.
    - Read `references/spec-id-policy.md` before inventing a new policy.
 6. Treat TDD as a workflow, not a slogan.
-   - Product behavior -> test plan -> red -> green -> refactor -> broaden -> validate -> record.
+   - The outer engineering loop is Plan -> Develop -> Verify -> Fix.
+   - TDD is the inner loop inside Develop/Verify: product behavior -> test plan -> red -> green -> refactor -> broaden -> validate -> record.
+   - Do not present TDD as a competing workflow.
    - Read `references/tdd-workflow.md` when defining or auditing TDD rules.
 7. Tie every rule to a decision point.
    - A good rule tells the next human or agent what to do differently.

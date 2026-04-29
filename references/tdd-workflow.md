@@ -8,6 +8,15 @@ Use this loop for behavior changes:
 Product behavior -> test plan -> red -> green -> refactor -> broaden -> validate -> record
 ```
 
+This is the inner loop inside the broader `Plan -> Develop -> Verify -> Fix` engineering cycle. Do not treat TDD as a separate competing workflow.
+
+## Relationship To Development Workflow
+
+- **Plan:** decide whether the change needs a spec and whether TDD applies.
+- **Develop:** write or update behavior, write the failing test, make it pass, and refactor while green.
+- **Verify:** broaden tests, run manual checks if needed, and record evidence.
+- **Fix:** respond to failures or review feedback; update specs or governance docs if reality changed.
+
 ## Steps
 
 1. Write or update behavior invariants in `PRODUCT.md`.
@@ -36,4 +45,3 @@ For non-trivial behavior changes, capture:
 ## When TDD Can Be Light
 
 Use a lighter loop for documentation-only edits, mechanical renames, dependency bumps, generated code updates, or changes where the repository has no realistic automated test seam. Still record manual validation or explain why no validation was run.
-

@@ -104,7 +104,22 @@ When an adapter is added, removed, renamed, or moved, update this file and `AGEN
 
 DEVELOPMENT = """# Development Workflow
 
-## Default Loop
+## Outer Loop
+
+Use this loop for all non-trivial engineering work:
+
+```text
+Plan -> Develop -> Verify -> Fix
+```
+
+1. Plan: read the relevant governance docs, decide whether a spec is needed, identify risk, and choose the smallest coherent task shape.
+2. Develop: make the change. When TDD applies, use `docs/governance/tdd-workflow.md` inside this phase.
+3. Verify: run narrow validation first, broaden when behavior or shared contracts changed, and record evidence. When TDD applies, the broaden/validate/record steps come from `docs/governance/tdd-workflow.md`.
+4. Fix: respond to failing tests, review feedback, or validation gaps. If reality changed, update specs or governance docs before repeating Develop/Verify.
+
+TDD is not a competing workflow. It is the inner loop used inside Develop and Verify when behavior changes call for it.
+
+## Default Steps
 
 1. Read `AGENTS.md`.
 2. Read the workflow file that matches the task.
@@ -201,6 +216,8 @@ def tdd_workflow(tdd: str) -> str:
 {expectation}
 
 ## Loop
+
+TDD is the inner loop inside the broader `Plan -> Develop -> Verify -> Fix` engineering cycle in `development-workflow.md`.
 
 ```text
 Product behavior -> test plan -> red -> green -> refactor -> broaden -> validate -> record
