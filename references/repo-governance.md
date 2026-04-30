@@ -18,6 +18,7 @@ Prefer a small number of clear layers:
 - Current: rules are updated in the same change as workflow changes.
 - Minimal: rules avoid ceremony for simple changes.
 - Verifiable: important behavior maps to tests or manual validation.
+- Visual: UI-visible changes require screenshots or recordings unless explicitly not applicable.
 - Routed: `AGENTS.md` points to the current workflow files without duplicating them.
 - Coordinated: active specs use `STATUS.md` and `workstreams/*.md` instead of hidden chat state.
 - Structural: code-quality rules require change gates before adding surface and reject dead code, non-orthogonal interfaces, hidden side effects, duplicate business rules, and permanent temporary layers.
@@ -33,6 +34,7 @@ Prefer a small number of clear layers:
 - Pull requests require checkboxes no one actually uses.
 - Agent rules mention stale commands or old directory names.
 - Validation is left as "run tests" without naming which tests matter.
+- UI-visible changes merge with no screenshot, recording, or not-applicable note.
 - Code-quality guidance says "keep code clean" but does not say when to delete, split, rename, or block a change.
 - New APIs, commands, configs, dependencies, docs, adapters, or agent entrypoints appear without explaining why existing paths were insufficient.
 - Compatibility layers, feature flags, configs, and TODOs have no owner or deletion condition.

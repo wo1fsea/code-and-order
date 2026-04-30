@@ -91,6 +91,7 @@ specs/
 12. Validate the result.
    - Confirm links and paths work.
    - Confirm setup/test commands are discoverable.
+   - For UI-visible changes, require visual evidence or an explicit not-applicable note.
    - Confirm the workflow says when to skip ceremony.
    - Summarize what changed and what remains intentionally undecided.
 
@@ -134,5 +135,6 @@ Skip specs for narrow bug fixes, mechanical refactors, dependency bumps, or obvi
 - Read `references/spec-id-policy.md` when defining or reviewing spec id format.
 - Read `references/spec-execution-status.md` when managing spec lifecycle, partial implementation, or multi-agent workstreams.
 - Read `references/tdd-workflow.md` when adding TDD expectations.
+- Read `references/validation-patterns.md` when defining validation weight, UI-visible evidence, or repo-pattern-specific checks.
 - Read `references/universal-agent-init.md` when initializing Codex, Copilot, Claude, and Gemini context files together.
 - Use `scripts/init_governance.py` when a repo needs a deterministic starter structure.

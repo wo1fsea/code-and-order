@@ -60,6 +60,7 @@ Signals:
 Default governance:
 - Development, validation, TDD, code-quality, and review workflows.
 - Validation should include build/typecheck plus targeted UI or browser checks when behavior is visual.
+- UI-visible changes require visual evidence unless explicitly not applicable: screenshots or recordings for relevant states and viewports.
 
 Enable when needed:
 - Visual governance for design-sensitive products.
