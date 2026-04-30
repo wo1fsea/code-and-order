@@ -20,6 +20,7 @@ Prefer a small number of clear layers:
 - Verifiable: important behavior maps to tests or manual validation.
 - Visual: UI-visible changes require screenshots or recordings unless explicitly not applicable.
 - Routed: `AGENTS.md` points to the current workflow files without duplicating them.
+- Documented: docs have a clear source of truth, audience, scope, validation path, and retirement path.
 - Coordinated: active specs use `STATUS.md` and `workstreams/*.md` instead of hidden chat state.
 - Structural: code-quality rules require change gates before adding surface and reject dead code, non-orthogonal interfaces, hidden side effects, duplicate business rules, and permanent temporary layers.
 - Contained: temporary artifacts stay in ignored temp locations unless intentionally promoted.
@@ -36,6 +37,10 @@ Prefer a small number of clear layers:
 - Spec execution status is tracked in chat, branch names, or moved directories instead of committed status files.
 - Pull requests require checkboxes no one actually uses.
 - Agent rules mention stale commands or old directory names.
+- README, docs, examples, or generated docs describe behavior that no longer exists.
+- The same setup step, API contract, command, or governance rule is copied into several docs without a canonical source.
+- A generated doc was hand-edited without updating the generator or source.
+- Historical decisions are silently rewritten instead of superseded or corrected.
 - Validation is left as "run tests" without naming which tests matter.
 - UI-visible changes merge with no screenshot, recording, or not-applicable note.
 - Code-quality guidance says "keep code clean" but does not say when to delete, split, rename, or block a change.

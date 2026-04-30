@@ -44,6 +44,7 @@ Keep this file short. Put detailed rules in `docs/governance/` and use this file
 | Any code change | `docs/governance/development-workflow.md` |
 | New or changed API, command, config, dependency, adapter, workflow doc, template, or agent entrypoint | `docs/governance/change-gate.md` |
 | Code structure, interfaces, dead code, dependencies, or compatibility layers | `docs/governance/code-quality.md` |
+| README, docs, examples, generated docs, specs, contributor guidance, or agent instructions | `docs/governance/documentation-standards.md` |
 | Screenshots, recordings, traces, logs, reports, debug dumps, or scratch files | `docs/governance/temp-artifacts.md` |
 | Ambiguous feature or cross-module change | `docs/governance/spec-workflow.md` |
 | Creating or revising specs | `docs/governance/spec-production.md` |
@@ -61,6 +62,7 @@ Keep this file short. Put detailed rules in `docs/governance/` and use this file
 - Thin adapter files such as `CLAUDE.md`, `GEMINI.md`, and `.github/copilot-instructions.md` must point here instead of copying rules.
 - When adding, deleting, renaming, or moving governance documents, update this file in the same change.
 - When changing which workflow applies to a task type, update the Governance Map in this file in the same change.
+- Do not duplicate long-lived documentation; keep one source of truth and route to it.
 - Do not skip tests or validation silently. Record what ran and what did not.
 - Do not preserve dead code, stale flags, or compatibility paths without an owner and deletion condition.
 - Do not scatter temporary artifacts through the repo. Use `.out/` unless local rules say otherwise.
@@ -138,11 +140,12 @@ TDD is not a competing workflow. It is the inner loop used inside Develop and Ve
 3. Inspect the existing code and tests before editing.
 4. If adding or expanding project surface, apply `docs/governance/change-gate.md`.
 5. For code changes, apply `docs/governance/code-quality.md`.
-6. If producing temporary artifacts, apply `docs/governance/temp-artifacts.md`.
-7. Make the smallest coherent change.
-8. Run the narrowest meaningful validation first.
-9. Broaden validation when behavior, contracts, or shared modules changed.
-10. Record tests run, tests skipped, and residual risk.
+6. For docs, examples, generated docs, specs, contributor guidance, or agent instructions, apply `docs/governance/documentation-standards.md`.
+7. If producing temporary artifacts, apply `docs/governance/temp-artifacts.md`.
+8. Make the smallest coherent change.
+9. Run the narrowest meaningful validation first.
+10. Broaden validation when behavior, contracts, docs, or shared modules changed.
+11. Record tests run, docs checked, tests skipped, and residual risk.
 
 ## Direct Implementation
 
@@ -295,6 +298,69 @@ Use these rules as review gates for code changes. Violations should be fixed or 
 - Remove or revisit when:
 - Tracking issue/spec:
 - Validation:
+```
+"""
+
+
+DOCUMENTATION_STANDARDS = """# Documentation Standards
+
+Documentation is project surface. It should have a clear source of truth, audience, scope, validation path, and retirement path.
+
+## When Required
+
+Apply this when a change:
+
+- Adds, moves, renames, deletes, or substantially rewrites a doc.
+- Changes user/API-visible behavior that existing docs describe.
+- Changes commands, configuration, environment variables, file formats, schemas, setup, deployment, validation, or troubleshooting steps.
+- Adds or changes examples, snippets, templates, generated docs, screenshots, diagrams, or public contributor guidance.
+- Changes agent instructions, governance files, specs, or routing docs such as `AGENTS.md`, `README.md`, `CONTRIBUTING.md`, or `docs/README.md`.
+
+If a behavior change does not require documentation, record why in the PR, workstream, or change note.
+
+## Required Rules
+
+1. Define one source of truth.
+   - Do not copy the same rule, command, API shape, or setup instruction into multiple long-lived docs.
+   - If multiple entrypoints need the same information, make one canonical and point the others to it.
+
+2. State audience and scope early.
+   - A reader should quickly know whether the doc is for users, contributors, maintainers, operators, reviewers, or agents.
+
+3. Keep routers thin.
+   - Entry files such as `AGENTS.md`, `CLAUDE.md`, `GEMINI.md`, Copilot instructions, root README sections, and docs indexes should route, not duplicate.
+   - When adding, deleting, renaming, or moving canonical docs, update the router in the same change.
+
+4. Update docs with behavior.
+   - Code changes that alter documented behavior must update the relevant docs in the same change or record why no doc update is needed.
+
+5. Validate examples and commands.
+   - Commands should include working directory, required environment, expected output shape, or validation context when not obvious.
+   - Snippets and examples must either be runnable/verified or clearly marked illustrative.
+
+6. Treat generated docs as generated.
+   - Record the generator or source.
+   - Update the source and regenerate instead of hand-editing generated output, unless the repo documents an exception.
+
+7. Delete or supersede stale docs.
+   - When a doc is obsolete, remove it or mark it superseded with the replacement path.
+   - Do not preserve old docs without owner and review condition.
+
+8. Separate durable docs from working notes.
+   - Drafts, raw agent notes, debug output, screenshots, recordings, traces, and generated reports stay in `.out/` until accepted or promoted.
+
+## Documentation Evidence
+
+```markdown
+## Documentation Evidence
+
+- Docs updated / N/A:
+- Source of truth:
+- Routers or indexes updated:
+- Links checked:
+- Examples or commands checked:
+- Generated docs regenerated / N/A:
+- Stale docs removed or superseded:
 ```
 """
 
@@ -812,6 +878,7 @@ REVIEW = """# Review Workflow
 - Summarize behavior changes and implementation shape.
 - Check `docs/governance/change-gate.md` when adding or expanding project surface.
 - Check `docs/governance/code-quality.md` for structural code-quality issues.
+- Check `docs/governance/documentation-standards.md` when docs, examples, generated docs, specs, contributor guidance, or agent instructions changed.
 - Check `docs/governance/temp-artifacts.md` when temporary outputs were produced.
 - Include validation evidence.
 - Call out risks, migrations, and follow-ups.
@@ -983,6 +1050,14 @@ def pr_template(tdd: str) -> str:
 - Gate answered:
 - Compatibility exception:
 
+## Documentation
+
+- Docs updated / N/A:
+- Source of truth:
+- Routers or indexes updated:
+- Examples, commands, links, or generated docs checked:
+- Stale docs removed or superseded:
+
 ## Temp Artifacts
 
 - Created / N/A:
@@ -1020,6 +1095,7 @@ def planned_files(root: Path, suite: str, tdd: str, spec_id: str) -> list[tuple[
         (root / "docs" / "governance" / "development-workflow.md", DEVELOPMENT),
         (root / "docs" / "governance" / "change-gate.md", CHANGE_GATE),
         (root / "docs" / "governance" / "code-quality.md", CODE_QUALITY),
+        (root / "docs" / "governance" / "documentation-standards.md", DOCUMENTATION_STANDARDS),
         (root / "docs" / "governance" / "temp-artifacts.md", TEMP_ARTIFACTS),
         (root / "docs" / "governance" / "spec-production.md", SPEC_PRODUCTION),
         (root / "docs" / "governance" / "spec-workflow.md", SPEC_WORKFLOW),

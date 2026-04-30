@@ -136,6 +136,7 @@ Signals:
 Default governance:
 - Canonical entrypoint and source-of-truth rules.
 - Documentation sync and stale-content deletion.
+- Documentation standards for audience, scope, examples, generated docs, links, indexes, and superseded content.
 - Lightweight validation for links, formatting, examples, and generated outputs.
 
 Enable when needed:

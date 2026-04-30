@@ -10,6 +10,7 @@ Use for small tools, docs-heavy repos, and low-risk changes.
 
 Expected evidence:
 - Formatting, lint, typecheck, build, or a narrow smoke command when available.
+- Link, formatting, or example checks for documentation changes when available.
 - Manual check only when automation is not meaningful.
 - Record commands skipped and why.
 
@@ -22,6 +23,7 @@ Expected evidence:
 - Relevant unit tests.
 - Build or typecheck.
 - Targeted integration, browser, or manual checks for touched behavior.
+- Documentation checks for changed README, examples, generated docs, specs, or contributor guidance.
 - Visual evidence for UI-visible changes.
 
 ### strict
@@ -31,6 +33,7 @@ Use for public contracts, protocol surfaces, long-running services, migrations, 
 Expected evidence:
 - Narrow tests plus broader regression tests.
 - Contract, schema, migration, or compatibility checks when relevant.
+- Documentation source-of-truth, generated-output, public example, and link checks when docs are public or normative.
 - Observability, rollback, or failure-path checks for services.
 - Screenshots or recordings for critical UI flows and responsive states.
 
