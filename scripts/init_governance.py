@@ -38,6 +38,7 @@ Keep this file short. Put detailed rules in `docs/governance/` and use this file
 | Situation | Read |
 |---|---|
 | Any code change | `docs/governance/development-workflow.md` |
+| Code structure, interfaces, dead code, dependencies, or compatibility layers | `docs/governance/code-quality.md` |
 | Ambiguous feature or cross-module change | `docs/governance/spec-workflow.md` |
 | Choosing or reviewing a spec id | `docs/governance/spec-id-policy.md` |
 | Spec execution status or parallel workstreams | `docs/governance/spec-execution-status.md` |
@@ -53,6 +54,7 @@ Keep this file short. Put detailed rules in `docs/governance/` and use this file
 - When adding, deleting, renaming, or moving governance documents, update this file in the same change.
 - When changing which workflow applies to a task type, update the Governance Map in this file in the same change.
 - Do not skip tests or validation silently. Record what ran and what did not.
+- Do not preserve dead code, stale flags, or compatibility paths without an owner and deletion condition.
 - Do not revert user changes unless explicitly asked.
 """
 
@@ -125,10 +127,11 @@ TDD is not a competing workflow. It is the inner loop used inside Develop and Ve
 1. Read `AGENTS.md`.
 2. Read the workflow file that matches the task.
 3. Inspect the existing code and tests before editing.
-4. Make the smallest coherent change.
-5. Run the narrowest meaningful validation first.
-6. Broaden validation when behavior, contracts, or shared modules changed.
-7. Record tests run, tests skipped, and residual risk.
+4. For code changes, apply `docs/governance/code-quality.md`.
+5. Make the smallest coherent change.
+6. Run the narrowest meaningful validation first.
+7. Broaden validation when behavior, contracts, or shared modules changed.
+8. Record tests run, tests skipped, and residual risk.
 
 ## Direct Implementation
 
@@ -137,6 +140,83 @@ Use direct implementation for narrow bug fixes, mechanical refactors, dependency
 ## Spec-Driven Implementation
 
 Use `docs/governance/spec-workflow.md` when behavior is ambiguous, user-visible, cross-module, or high risk.
+"""
+
+
+CODE_QUALITY = """# Code Quality
+
+Use these rules as review gates for code changes. Violations should be fixed or recorded as explicit, owned exceptions.
+
+## Required Rules
+
+1. Remove dead code.
+   - Delete unused functions, exports, classes, components, routes, flags, configs, unreachable branches, stale adapters, and obsolete compatibility paths.
+   - Keep legacy code only when it has an owner, a reason, and a deletion condition.
+
+2. Keep capability interfaces orthogonal.
+   - Each public function, API, command, option, or configuration field should represent one independent concept.
+   - Do not combine unrelated behavior behind positional flags, mode strings, or overloaded parameters.
+   - If parameters constrain each other, introduce a named options object, split the interface, or model the valid states explicitly.
+
+3. Separate commands from queries.
+   - Query-shaped APIs must not mutate durable state, create records, emit irreversible side effects, or hide refresh/write behavior.
+   - Mutating APIs should be named as commands and document their side effects.
+
+4. Model state explicitly.
+   - Do not represent complex lifecycle state with loose boolean clusters.
+   - Prefer a single status enum, tagged union, state machine, or domain object that makes invalid states unrepresentable.
+
+5. Keep side effects at boundaries.
+   - Core logic should not directly read the network, database, filesystem, environment, current time, randomness, process state, or global mutable state.
+   - Pass side-effectful dependencies through parameters, adapters, services, or dependency injection points that are easy to test.
+
+6. Maintain one source of truth.
+   - Do not store the same business state in multiple fields, caches, configs, or services without a documented owner.
+   - If denormalization or caching is required, define invalidation, precedence, and conflict resolution.
+
+7. Collapse duplicate business rules.
+   - When the same business rule appears a third time, centralize it or record why duplication is safer for now.
+
+8. Reject speculative abstractions.
+   - Do not add frameworks, base classes, plugin systems, generic engines, or extension points for hypothetical future use.
+   - Abstract from real repetition, separate ownership, or proven variation.
+
+9. Name code by its real behavior.
+   - Function and module names must expose meaningful side effects.
+   - `validateUser` must not write records. `formatConfig` must not read environment.
+
+10. Design lifecycle APIs as a set.
+    - If a capability has `create`, decide whether `update`, `delete`, `archive`, `restore`, `list`, and `get` exist.
+    - If an operation is intentionally absent, record the product or domain reason.
+
+11. Use distinguishable errors.
+    - Callers should be able to distinguish validation, permission, not-found, conflict, timeout, dependency failure, and internal failure when those cases require different handling.
+
+12. Govern dependencies.
+    - New dependencies need a reason, an owner, and a note on why the standard library or existing dependency is not enough.
+
+13. Govern TODOs and incomplete code.
+    - `TODO`, `FIXME`, temporary flags, and partial compatibility paths must include an owner or issue/spec id.
+
+14. Govern configuration and feature flags.
+    - Every config or flag needs a default, scope, owner, and removal or review condition.
+    - Expired flags and unused config are dead code.
+
+15. Give compatibility layers an exit plan.
+    - Migration paths, adapters, legacy branches, fallbacks, and shims must state why they exist and when they can be deleted.
+
+## Exception Format
+
+```markdown
+## Code Quality Exception
+
+- Rule:
+- Reason:
+- Owner:
+- Remove or revisit when:
+- Tracking issue/spec:
+- Validation:
+```
 """
 
 
@@ -393,6 +473,7 @@ REVIEW = """# Review Workflow
 
 - Link the relevant spec when one exists.
 - Summarize behavior changes and implementation shape.
+- Check `docs/governance/code-quality.md` for structural code-quality issues.
 - Include validation evidence.
 - Call out risks, migrations, and follow-ups.
 
@@ -549,6 +630,11 @@ def pr_template(tdd: str) -> str:
 
 - Spec:
 
+## Code Quality
+
+- Dead code removed / N/A:
+- Interface, state, dependency, config, or compatibility-layer exceptions:
+
 ## Validation
 
 - Commands run:
@@ -575,6 +661,7 @@ def planned_files(root: Path, suite: str, tdd: str, spec_id: str) -> list[tuple[
         (root / "docs" / "governance" / "README.md", GOV_README),
         (root / "docs" / "governance" / "agent-context.md", AGENT_CONTEXT),
         (root / "docs" / "governance" / "development-workflow.md", DEVELOPMENT),
+        (root / "docs" / "governance" / "code-quality.md", CODE_QUALITY),
         (root / "docs" / "governance" / "spec-workflow.md", SPEC_WORKFLOW),
         (root / "docs" / "governance" / "spec-id-policy.md", SPEC_ID_POLICY),
         (root / "docs" / "governance" / "spec-execution-status.md", SPEC_EXECUTION_STATUS),

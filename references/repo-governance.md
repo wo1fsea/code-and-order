@@ -20,6 +20,7 @@ Prefer a small number of clear layers:
 - Verifiable: important behavior maps to tests or manual validation.
 - Routed: `AGENTS.md` points to the current workflow files without duplicating them.
 - Coordinated: active specs use `STATUS.md` and `workstreams/*.md` instead of hidden chat state.
+- Structural: code-quality rules reject dead code, non-orthogonal interfaces, hidden side effects, duplicate business rules, and permanent temporary layers.
 
 ## Common Smells
 
@@ -32,6 +33,8 @@ Prefer a small number of clear layers:
 - Pull requests require checkboxes no one actually uses.
 - Agent rules mention stale commands or old directory names.
 - Validation is left as "run tests" without naming which tests matter.
+- Code-quality guidance says "keep code clean" but does not say when to delete, split, rename, or block a change.
+- Compatibility layers, feature flags, configs, and TODOs have no owner or deletion condition.
 
 ## Useful Readiness States
 
