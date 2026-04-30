@@ -50,6 +50,8 @@ Default evidence:
 - Desktop viewport for most changes.
 - Mobile viewport when layout, responsive behavior, touch interaction, or narrow-screen content may be affected.
 
+Store screenshots, recordings, traces, and other validation artifacts according to `references/temp-artifacts.md`.
+
 For canvas, Three.js, charts, maps, or animation:
 - Confirm the surface is nonblank.
 - Confirm primary elements render in frame.

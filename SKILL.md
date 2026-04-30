@@ -22,7 +22,9 @@ docs/governance/
   README.md
   agent-context.md
   development-workflow.md
+  change-gate.md
   code-quality.md
+  temp-artifacts.md
   spec-workflow.md
   spec-id-policy.md
   spec-execution-status.md
@@ -63,7 +65,9 @@ specs/
    - Add a `specs/` workflow only for ambiguous or cross-module work.
    - Add templates or checklists only when they remove repeated judgment calls.
 5. Add structural code-quality governance for code-change review gates.
-   - Focus on concrete rules: change gates before adding surface, dead code removal, orthogonal interfaces, command/query separation, explicit state, side-effect boundaries, single source of truth, duplicate business-rule removal, dependency/config ownership, and compatibility-layer exit plans.
+   - Focus on concrete rules: change gates before adding surface, temp artifact containment, dead code removal, orthogonal interfaces, command/query separation, explicit state, side-effect boundaries, single source of truth, duplicate business-rule removal, dependency/config ownership, and compatibility-layer exit plans.
+   - Read `references/change-gate.md` when new APIs, commands, configs, dependencies, adapters, file formats, workflow docs, templates, or agent entrypoints are added or expanded.
+   - Read `references/temp-artifacts.md` when screenshots, recordings, traces, logs, generated reports, debug dumps, or scratch files are produced.
    - Read `references/code-quality.md` when defining or auditing these rules.
 6. Separate product intent from implementation planning.
    - `PRODUCT.md`: user/API-visible behavior, testable invariants, goals, non-goals, open questions.
@@ -130,7 +134,9 @@ Skip specs for narrow bug fixes, mechanical refactors, dependency bumps, or obvi
 
 - Read `references/repo-governance.md` when designing or auditing a repo governance layout.
 - Read `references/repo-patterns.md` before choosing governance modules for a new, unfamiliar, or mixed repo.
+- Read `references/change-gate.md` when adding or expanding any project surface.
 - Read `references/code-quality.md` when adding concrete code-quality review gates.
+- Read `references/temp-artifacts.md` when managing screenshots, logs, traces, reports, scratch files, or other temporary outputs.
 - Read `references/spec-templates.md` when creating `PRODUCT.md` / `TECH.md` templates.
 - Read `references/spec-id-policy.md` when defining or reviewing spec id format.
 - Read `references/spec-execution-status.md` when managing spec lifecycle, partial implementation, or multi-agent workstreams.

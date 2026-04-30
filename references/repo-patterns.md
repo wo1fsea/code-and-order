@@ -40,7 +40,7 @@ Signals:
 Default governance:
 - `AGENTS.md` as the canonical router.
 - Development, validation, and code-quality workflows.
-- Temp artifact rule when the tool produces logs, screenshots, or generated files.
+- Temp artifact rule when the tool produces logs, screenshots, traces, scratch files, or generated files.
 
 Enable when needed:
 - TDD for behavior changes.

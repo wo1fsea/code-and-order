@@ -14,6 +14,10 @@ SPEC_ID_RE = re.compile(
 )
 
 
+GITIGNORE = """.out/
+"""
+
+
 def agents_md(tdd: str) -> str:
     tdd_row = (
         "| TDD work | `docs/governance/tdd-workflow.md` |\n"
@@ -38,7 +42,9 @@ Keep this file short. Put detailed rules in `docs/governance/` and use this file
 | Situation | Read |
 |---|---|
 | Any code change | `docs/governance/development-workflow.md` |
-| New or changed surface, code structure, interfaces, dead code, dependencies, or compatibility layers | `docs/governance/code-quality.md` |
+| New or changed API, command, config, dependency, adapter, workflow doc, template, or agent entrypoint | `docs/governance/change-gate.md` |
+| Code structure, interfaces, dead code, dependencies, or compatibility layers | `docs/governance/code-quality.md` |
+| Screenshots, recordings, traces, logs, reports, debug dumps, or scratch files | `docs/governance/temp-artifacts.md` |
 | Ambiguous feature or cross-module change | `docs/governance/spec-workflow.md` |
 | Choosing or reviewing a spec id | `docs/governance/spec-id-policy.md` |
 | Spec execution status or parallel workstreams | `docs/governance/spec-execution-status.md` |
@@ -55,6 +61,7 @@ Keep this file short. Put detailed rules in `docs/governance/` and use this file
 - When changing which workflow applies to a task type, update the Governance Map in this file in the same change.
 - Do not skip tests or validation silently. Record what ran and what did not.
 - Do not preserve dead code, stale flags, or compatibility paths without an owner and deletion condition.
+- Do not scatter temporary artifacts through the repo. Use `.out/` unless local rules say otherwise.
 - Do not revert user changes unless explicitly asked.
 """
 
@@ -127,11 +134,13 @@ TDD is not a competing workflow. It is the inner loop used inside Develop and Ve
 1. Read `AGENTS.md`.
 2. Read the workflow file that matches the task.
 3. Inspect the existing code and tests before editing.
-4. For code changes, apply `docs/governance/code-quality.md`.
-5. Make the smallest coherent change.
-6. Run the narrowest meaningful validation first.
-7. Broaden validation when behavior, contracts, or shared modules changed.
-8. Record tests run, tests skipped, and residual risk.
+4. If adding or expanding project surface, apply `docs/governance/change-gate.md`.
+5. For code changes, apply `docs/governance/code-quality.md`.
+6. If producing temporary artifacts, apply `docs/governance/temp-artifacts.md`.
+7. Make the smallest coherent change.
+8. Run the narrowest meaningful validation first.
+9. Broaden validation when behavior, contracts, or shared modules changed.
+10. Record tests run, tests skipped, and residual risk.
 
 ## Direct Implementation
 
@@ -143,25 +152,77 @@ Use `docs/governance/spec-workflow.md` when behavior is ambiguous, user-visible,
 """
 
 
+CHANGE_GATE = """# Change Gate
+
+Use this gate before adding or expanding project surface. Every new surface must prove that it deserves to exist.
+
+## What Counts As Surface
+
+- API endpoint or route.
+- Public or exported function, class, component, package export, or module.
+- CLI command, option, flag, or output format.
+- Configuration field, environment variable, feature flag, or runtime mode.
+- Dependency, adapter, integration, provider, or compatibility shim.
+- File format, schema, database shape, event format, or protocol message.
+- Workflow document, governance file, template, agent entrypoint, or generated starter file.
+- Plugin extension point, hook, callback, or user-facing customization point.
+
+## When Required
+
+Run the gate when a change adds, expands, renames, replaces, deprecates, or removes surface.
+
+## Gate Questions
+
+```markdown
+## Change Gate
+
+- Problem:
+- Existing path considered:
+- Why existing path is insufficient:
+- Smallest new surface:
+- What will be deleted or replaced:
+- Owner:
+- Validation:
+- Temporary or permanent:
+- Removal condition:
+```
+
+## Rules
+
+- Prefer reuse before adding surface.
+- Keep new surface minimal.
+- Delete superseded paths in the same change unless compatibility requires retention.
+- New configs, flags, adapters, dependencies, workflows, and templates need owners.
+- New surface needs validation tied to the surface.
+- Temporary surface needs a concrete removal condition.
+- Public surface needs compatibility notes.
+- Documentation surface counts.
+- Dependencies count.
+
+## Compatibility Exception
+
+```markdown
+## Compatibility Exception
+
+- Old path:
+- New path:
+- Why retained:
+- Owner:
+- Remove when:
+- Tracking issue/spec:
+- Validation:
+```
+"""
+
+
 CODE_QUALITY = """# Code Quality
 
 Use these rules as review gates for code changes. Violations should be fixed or recorded as explicit, owned exceptions.
 
-## Change Gate Before Adding Surface
+## Related Gates
 
-Run this gate before adding or expanding any API, CLI command or flag, exported function, configuration field, environment variable, feature flag, dependency, adapter, file format, workflow document, agent entrypoint, or public template.
-
-Answer these questions in the PR, spec, workstream, or nearby decision record:
-
-1. What exact problem or behavior requires a new surface?
-2. Which existing path was considered, and why is it insufficient?
-3. What is the smallest new surface that solves the problem?
-4. What old code, command, config, document, adapter, flag, test, or dependency can be deleted in the same change?
-5. Who owns the new surface and its future changes?
-6. How will the new surface be validated?
-7. Is the surface temporary? If yes, what is the removal condition?
-
-Default outcome: if an existing path can solve the problem, do not add new surface. If a new path supersedes an old path, remove the old path or record a specific compatibility exception.
+- Before adding or expanding project surface, apply `docs/governance/change-gate.md`.
+- When producing screenshots, recordings, traces, logs, generated reports, debug dumps, or scratch files, apply `docs/governance/temp-artifacts.md`.
 
 ## Required Rules
 
@@ -232,6 +293,57 @@ Default outcome: if an existing path can solve the problem, do not add new surfa
 - Remove or revisit when:
 - Tracking issue/spec:
 - Validation:
+```
+"""
+
+
+TEMP_ARTIFACTS = """# Temp Artifacts
+
+Temporary artifacts are useful during work, but they must not pollute formal repo knowledge.
+
+## Default Directory
+
+Use `.out/` by default:
+
+```text
+.out/
+  screenshots/
+  recordings/
+  traces/
+  logs/
+  reports/
+  scratch/
+```
+
+`.out/` should be gitignored unless the repo has a stronger local convention.
+
+## Artifact Classes
+
+- `ephemeral`: temporary debugging output. Default: do not commit.
+- `evidence`: validation evidence referenced by a PR, spec, or workstream. Default: cite the path, do not commit.
+- `promoted`: artifact that must be retained long term. Move it into an owned docs/spec location.
+
+## Rules
+
+- Put temporary artifacts in `.out/`.
+- Do not commit `.out/` by default.
+- Evidence can be referenced without being committed.
+- Promote long-term artifacts into owned locations such as `docs/assets/`, `docs/reports/`, or `specs/<spec-id>/evidence/`.
+- Do not place unpromoted artifacts in repo root, `docs/`, `specs/`, `src/`, or `tests/`.
+- Raw agent drafts stay in `.out/scratch/` until explicitly accepted.
+- Cleanup is part of done.
+- Do not write secrets, tokens, private customer data, or sensitive logs into `.out/`.
+
+## Reporting
+
+```markdown
+## Temp Artifacts
+
+- Created:
+- Referenced as evidence:
+- Promoted:
+- Cleaned:
+- Intentionally retained:
 ```
 """
 
@@ -487,6 +599,8 @@ Default evidence:
 
 If visual evidence is not applicable, record why and provide substitute evidence.
 
+Store screenshots, recordings, traces, and other validation artifacts according to `docs/governance/temp-artifacts.md`.
+
 ## Reporting
 
 Record:
@@ -505,7 +619,9 @@ REVIEW = """# Review Workflow
 
 - Link the relevant spec when one exists.
 - Summarize behavior changes and implementation shape.
+- Check `docs/governance/change-gate.md` when adding or expanding project surface.
 - Check `docs/governance/code-quality.md` for structural code-quality issues.
+- Check `docs/governance/temp-artifacts.md` when temporary outputs were produced.
 - Include validation evidence.
 - Call out risks, migrations, and follow-ups.
 
@@ -664,9 +780,21 @@ def pr_template(tdd: str) -> str:
 
 ## Code Quality
 
-- New or expanded surface gate answered / N/A:
 - Dead code removed / N/A:
 - Interface, state, dependency, config, or compatibility-layer exceptions:
+
+## Change Gate
+
+- Required:
+- Gate answered:
+- Compatibility exception:
+
+## Temp Artifacts
+
+- Created / N/A:
+- Referenced as evidence:
+- Promoted:
+- Cleaned or intentionally retained:
 
 ## Validation
 
@@ -691,11 +819,14 @@ def write_if_missing(path: Path, content: str) -> bool:
 
 def planned_files(root: Path, suite: str, tdd: str, spec_id: str) -> list[tuple[Path, str]]:
     files = [
+        (root / ".gitignore", GITIGNORE),
         (root / "AGENTS.md", agents_md(tdd)),
         (root / "docs" / "governance" / "README.md", GOV_README),
         (root / "docs" / "governance" / "agent-context.md", AGENT_CONTEXT),
         (root / "docs" / "governance" / "development-workflow.md", DEVELOPMENT),
+        (root / "docs" / "governance" / "change-gate.md", CHANGE_GATE),
         (root / "docs" / "governance" / "code-quality.md", CODE_QUALITY),
+        (root / "docs" / "governance" / "temp-artifacts.md", TEMP_ARTIFACTS),
         (root / "docs" / "governance" / "spec-workflow.md", SPEC_WORKFLOW),
         (root / "docs" / "governance" / "spec-id-policy.md", SPEC_ID_POLICY),
         (root / "docs" / "governance" / "spec-execution-status.md", SPEC_EXECUTION_STATUS),
