@@ -54,6 +54,67 @@ Product spec: `./PRODUCT.md`
 - Follow-up:
 ```
 
+## STATUS.md
+
+```markdown
+---
+spec_id: <spec-id>
+status: ready
+implementation: not_started
+validation: not_started
+updated: YYYY-MM-DD
+---
+
+# Status
+
+## Summary
+
+## Workstreams
+
+| ID | Scope | Status | Owner | Branch / PR | Updated |
+|---|---|---|---|---|---|
+| 01 | Implementation | ready | unassigned | | |
+
+## Activity Log
+
+- YYYY-MM-DD: status initialized.
+```
+
+## Workstream
+
+```markdown
+---
+id: 01-implementation
+status: ready
+owner: unassigned
+branch:
+pr:
+files: []
+depends_on: []
+updated: YYYY-MM-DD
+---
+
+# Implementation Workstream
+
+## Scope
+
+## Plan
+
+## Progress
+
+## Validation
+
+## Blocked
+
+Reason:
+Unblock when:
+Owner to unblock:
+
+## Activity Log
+
+- YYYY-MM-DD: workstream initialized.
+```
+
 ## Spec ID Examples
 
 Use `specs/<source>-<id>-<short-slug>/`.
@@ -67,3 +128,5 @@ specs/adhoc-20260430-tdd-bootstrap/
 ```
 
 See `references/spec-id-policy.md` for the full policy.
+
+See `references/spec-execution-status.md` for lifecycle and workstream status rules.

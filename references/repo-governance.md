@@ -19,6 +19,7 @@ Prefer a small number of clear layers:
 - Minimal: rules avoid ceremony for simple changes.
 - Verifiable: important behavior maps to tests or manual validation.
 - Routed: `AGENTS.md` points to the current workflow files without duplicating them.
+- Coordinated: active specs use `STATUS.md` and `workstreams/*.md` instead of hidden chat state.
 
 ## Common Smells
 
@@ -27,6 +28,7 @@ Prefer a small number of clear layers:
 - Claude, Gemini, or Copilot adapter files copy rules that belong in `docs/governance/`.
 - A governance file was added, moved, or renamed without updating `AGENTS.md`.
 - Specs describe implementation before product behavior is agreed.
+- Spec execution status is tracked in chat, branch names, or moved directories instead of committed status files.
 - Pull requests require checkboxes no one actually uses.
 - Agent rules mention stale commands or old directory names.
 - Validation is left as "run tests" without naming which tests matter.

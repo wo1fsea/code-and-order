@@ -35,6 +35,9 @@ Required:
 ```text
 PRODUCT.md
 TECH.md
+STATUS.md
+workstreams/
+  01-implementation.md
 ```
 
 Optional when useful:
@@ -51,4 +54,3 @@ ROLLBACK.md
 2. Keep `PRODUCT.md` aligned with shipped behavior.
 3. Keep `TECH.md` aligned with the implementation that actually landed.
 4. If the source ticket changes, prefer updating links inside the spec over renaming a directory that has already been referenced in commits or PRs.
-

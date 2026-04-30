@@ -24,6 +24,7 @@ docs/governance/
   development-workflow.md
   spec-workflow.md
   spec-id-policy.md
+  spec-execution-status.md
   tdd-workflow.md
   validation-workflow.md
   review-workflow.md
@@ -33,6 +34,9 @@ specs/
   <spec-id>/
     PRODUCT.md
     TECH.md
+    STATUS.md
+    workstreams/
+      01-implementation.md
 ```
 
 `AGENTS.md` is the canonical entry point, but it should stay short. It routes task types to the detailed governance files. Do not duplicate the detailed workflow text into `AGENTS.md` or the adapter files.
@@ -60,18 +64,23 @@ specs/
    - Preferred shape: `specs/<source>-<id>-<short-slug>/`.
    - Examples: `gh-123-open-file-tilde`, `linear-app-1066-agent-autonomy`, `rfc-0001-repo-governance`, `adhoc-20260430-tdd-bootstrap`.
    - Read `references/spec-id-policy.md` before inventing a new policy.
-6. Treat TDD as a workflow, not a slogan.
+6. Manage execution status explicitly.
+   - Do not encode status in directory names.
+   - Use `STATUS.md` for the overall spec board and `workstreams/*.md` for parallel execution.
+   - Agents claim and update their own workstream files, then synchronize only their row in `STATUS.md`.
+   - Read `references/spec-execution-status.md` when a spec has not started, is partially complete, is blocked, or has multiple agents working in parallel.
+7. Treat TDD as a workflow, not a slogan.
    - The outer engineering loop is Plan -> Develop -> Verify -> Fix.
    - TDD is the inner loop inside Develop/Verify: product behavior -> test plan -> red -> green -> refactor -> broaden -> validate -> record.
    - Do not present TDD as a competing workflow.
    - Read `references/tdd-workflow.md` when defining or auditing TDD rules.
-7. Tie every rule to a decision point.
+8. Tie every rule to a decision point.
    - A good rule tells the next human or agent what to do differently.
    - Delete or compress rules that only restate common sense.
-8. Maintain the router.
+9. Maintain the router.
    - When adding, deleting, renaming, or moving governance files, update `AGENTS.md` in the same change.
    - When changing which workflow applies to a task type, update the `AGENTS.md` governance map in the same change.
-9. Validate the result.
+10. Validate the result.
    - Confirm links and paths work.
    - Confirm setup/test commands are discoverable.
    - Confirm the workflow says when to skip ceremony.
@@ -113,6 +122,7 @@ Skip specs for narrow bug fixes, mechanical refactors, dependency bumps, or obvi
 - Read `references/repo-governance.md` when designing or auditing a repo governance layout.
 - Read `references/spec-templates.md` when creating `PRODUCT.md` / `TECH.md` templates.
 - Read `references/spec-id-policy.md` when defining or reviewing spec id format.
+- Read `references/spec-execution-status.md` when managing spec lifecycle, partial implementation, or multi-agent workstreams.
 - Read `references/tdd-workflow.md` when adding TDD expectations.
 - Read `references/universal-agent-init.md` when initializing Codex, Copilot, Claude, and Gemini context files together.
 - Use `scripts/init_governance.py` when a repo needs a deterministic starter structure.
