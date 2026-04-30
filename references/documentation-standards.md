@@ -1,3 +1,9 @@
+---
+language: en-US
+audience: agent
+doc_type: normative
+---
+
 # Documentation Standards
 
 Use this governance when creating, changing, or reviewing documentation, examples, agent instructions, contributor guidance, user-facing help, generated docs, or specs.
@@ -25,10 +31,49 @@ If a behavior change does not require documentation, record why in the PR, works
 - `explanatory`: Architecture notes, guides, design docs, and tutorials.
 - `spec`: Product, technical, status, and workstream docs under `specs/`.
 - `example`: Runnable examples, snippets, fixtures, screenshots, and diagrams.
+- `template`: Templates that are copied or rendered into future docs, issues, PRs, or specs.
 - `generated`: Docs produced from source, schemas, code, comments, or tooling.
 - `historical`: ADRs, decision records, incident notes, and superseded plans.
 
 Name the type implicitly in the location or explicitly near the top when ambiguity would affect maintenance.
+
+## Language And Audience
+
+Every new or substantially changed durable doc must declare its language near the top. Prefer YAML frontmatter when the file supports it:
+
+```yaml
+---
+language: en-US
+audience: agent
+doc_type: normative
+---
+```
+
+Use these values unless the repo defines a tighter local set:
+
+- `language`: `en-US`, `zh-CN`, or `mixed`.
+- `audience`: `agent`, `human`, or `mixed`.
+- `doc_type`: `router`, `normative`, `explanatory`, `spec`, `example`, `template`, `generated`, or `historical`.
+
+Rules:
+
+1. Use `en-US` for agent-facing docs by default.
+   - This includes `AGENTS.md`, agent adapters, governance docs, technical specs, status boards, workstreams, validation docs, and review workflows.
+
+2. Use the target reader's language for user-facing or team-facing docs.
+   - Product docs, project notes, public user docs, and team research can use the language of their primary human audience.
+
+3. Use `mixed` only when multiple languages are intentional.
+   - Label sections clearly when a doc mixes languages.
+   - Do not mix languages casually inside normative instructions.
+
+4. Keep code and tool literals unchanged.
+   - Code identifiers, commands, paths, flags, API names, error strings, and copied output remain literal even when surrounding prose uses another language.
+
+5. Use a comment metadata block when YAML frontmatter would leak into generated output.
+   - Templates that render directly into PRs, issues, or user-facing content may use a hidden HTML comment with `language`, `audience`, and `doc_type`.
+
+Existing docs without metadata should be backfilled when they are touched, moved, audited, or promoted.
 
 ## Required Rules
 
@@ -82,6 +127,7 @@ Use this in PRs, workstreams, or review notes:
 ## Documentation Evidence
 
 - Docs updated / N/A:
+- Language/audience/doc type declared:
 - Source of truth:
 - Routers or indexes updated:
 - Links checked:
@@ -93,6 +139,8 @@ Use this in PRs, workstreams, or review notes:
 ## Reviewer Checklist
 
 - Is there one clear source of truth?
+- Does each new or changed durable doc declare language, audience, and doc type?
+- Are agent-facing docs written in English unless a local exception is explicit?
 - Did behavior, command, config, setup, schema, or validation changes update docs?
 - Are routers and indexes current?
 - Are examples, snippets, screenshots, and commands still accurate?

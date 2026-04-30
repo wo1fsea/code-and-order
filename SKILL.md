@@ -1,6 +1,9 @@
 ---
 name: code-and-order
 description: Initialize, audit, and organize engineering governance rules for human-agent software projects. Use when a user wants to set up or clean up repo-local guidance such as AGENTS.md, spec workflows, project standards, review rules, validation checklists, issue readiness labels, agent collaboration rules, or reusable engineering-governance templates.
+language: en-US
+audience: agent
+doc_type: normative
 ---
 
 # Code & Order
@@ -73,7 +76,8 @@ specs/
    - Read `references/temp-artifacts.md` when screenshots, recordings, traces, logs, generated reports, debug dumps, or scratch files are produced.
    - Read `references/code-quality.md` when defining or auditing these rules.
 6. Add documentation standards for docs and examples.
-   - Treat documentation as project surface with one source of truth, clear audience and scope, validation, and stale-doc deletion or supersession.
+   - Treat documentation as project surface with language metadata, one source of truth, clear audience and scope, validation, and stale-doc deletion or supersession.
+   - Agent-facing docs should use English by default.
    - Read `references/documentation-standards.md` when README, docs, examples, contributor guidance, generated docs, governance files, specs, or agent instructions are created or changed.
 7. Separate product intent from implementation planning.
    - Read `references/spec-production.md` when turning a request into a new or revised spec.

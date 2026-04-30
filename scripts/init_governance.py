@@ -24,7 +24,13 @@ def agents_md(tdd: str) -> str:
         if tdd != "off"
         else ""
     )
-    return f"""# AGENTS.md
+    return f"""---
+language: en-US
+audience: agent
+doc_type: router
+---
+
+# AGENTS.md
 
 This is the canonical routing file for all coding agents.
 
@@ -62,6 +68,8 @@ Keep this file short. Put detailed rules in `docs/governance/` and use this file
 - Thin adapter files such as `CLAUDE.md`, `GEMINI.md`, and `.github/copilot-instructions.md` must point here instead of copying rules.
 - When adding, deleting, renaming, or moving governance documents, update this file in the same change.
 - When changing which workflow applies to a task type, update the Governance Map in this file in the same change.
+- New or substantially changed durable docs must declare `language`, `audience`, and `doc_type` near the top.
+- Agent-facing docs use English by default unless a local exception is explicit.
 - Do not duplicate long-lived documentation; keep one source of truth and route to it.
 - Do not skip tests or validation silently. Record what ran and what did not.
 - Do not preserve dead code, stale flags, or compatibility paths without an owner and deletion condition.
@@ -70,25 +78,49 @@ Keep this file short. Put detailed rules in `docs/governance/` and use this file
 """
 
 
-CLAUDE = """# CLAUDE.md
+CLAUDE = """---
+language: en-US
+audience: agent
+doc_type: router
+---
+
+# CLAUDE.md
 
 @AGENTS.md
 """
 
 
-GEMINI = """# GEMINI.md
+GEMINI = """---
+language: en-US
+audience: agent
+doc_type: router
+---
+
+# GEMINI.md
 
 @AGENTS.md
 """
 
 
-COPILOT = """# GitHub Copilot Instructions
+COPILOT = """---
+language: en-US
+audience: agent
+doc_type: router
+---
+
+# GitHub Copilot Instructions
 
 Follow `AGENTS.md` as the canonical repository guidance. Do not duplicate governance rules here.
 """
 
 
-GOV_README = """# Governance
+GOV_README = """---
+language: en-US
+audience: agent
+doc_type: router
+---
+
+# Governance
 
 This directory holds the detailed engineering governance workflows.
 
@@ -96,7 +128,13 @@ This directory holds the detailed engineering governance workflows.
 """
 
 
-AGENT_CONTEXT = """# Agent Context
+AGENT_CONTEXT = """---
+language: en-US
+audience: agent
+doc_type: normative
+---
+
+# Agent Context
 
 ## Canonical Rule
 
@@ -116,7 +154,13 @@ When an adapter is added, removed, renamed, or moved, update this file and `AGEN
 """
 
 
-DEVELOPMENT = """# Development Workflow
+DEVELOPMENT = """---
+language: en-US
+audience: agent
+doc_type: normative
+---
+
+# Development Workflow
 
 ## Outer Loop
 
@@ -157,7 +201,13 @@ Use `docs/governance/spec-workflow.md` when behavior is ambiguous, user-visible,
 """
 
 
-CHANGE_GATE = """# Change Gate
+CHANGE_GATE = """---
+language: en-US
+audience: agent
+doc_type: normative
+---
+
+# Change Gate
 
 Use this gate before adding or expanding project surface. Every new surface must prove that it deserves to exist.
 
@@ -220,7 +270,13 @@ Run the gate when a change adds, expands, renames, replaces, deprecates, or remo
 """
 
 
-CODE_QUALITY = """# Code Quality
+CODE_QUALITY = """---
+language: en-US
+audience: agent
+doc_type: normative
+---
+
+# Code Quality
 
 Use these rules as review gates for code changes. Violations should be fixed or recorded as explicit, owned exceptions.
 
@@ -302,7 +358,13 @@ Use these rules as review gates for code changes. Violations should be fixed or 
 """
 
 
-DOCUMENTATION_STANDARDS = """# Documentation Standards
+DOCUMENTATION_STANDARDS = """---
+language: en-US
+audience: agent
+doc_type: normative
+---
+
+# Documentation Standards
 
 Documentation is project surface. It should have a clear source of truth, audience, scope, validation path, and retirement path.
 
@@ -317,6 +379,29 @@ Apply this when a change:
 - Changes agent instructions, governance files, specs, or routing docs such as `AGENTS.md`, `README.md`, `CONTRIBUTING.md`, or `docs/README.md`.
 
 If a behavior change does not require documentation, record why in the PR, workstream, or change note.
+
+## Language And Audience
+
+Every new or substantially changed durable doc must declare its language near the top.
+
+```yaml
+---
+language: en-US
+audience: agent
+doc_type: normative
+---
+```
+
+Rules:
+
+- Use `en-US` for agent-facing docs by default.
+- Use the target reader's language for user-facing or team-facing docs.
+- Use `mixed` only when multiple languages are intentional, and label sections clearly.
+- Do not mix languages casually inside normative instructions.
+- Code identifiers, commands, paths, flags, API names, and error strings remain literal.
+- Use a hidden comment metadata block when YAML frontmatter would leak into generated output.
+
+Existing docs without metadata should be backfilled when touched, moved, audited, or promoted.
 
 ## Required Rules
 
@@ -355,6 +440,7 @@ If a behavior change does not require documentation, record why in the PR, works
 ## Documentation Evidence
 
 - Docs updated / N/A:
+- Language/audience/doc type declared:
 - Source of truth:
 - Routers or indexes updated:
 - Links checked:
@@ -365,7 +451,13 @@ If a behavior change does not require documentation, record why in the PR, works
 """
 
 
-TEMP_ARTIFACTS = """# Temp Artifacts
+TEMP_ARTIFACTS = """---
+language: en-US
+audience: agent
+doc_type: normative
+---
+
+# Temp Artifacts
 
 Temporary artifacts are useful during work, but they must not pollute formal repo knowledge.
 
@@ -416,7 +508,13 @@ Use `.out/` by default:
 """
 
 
-SPEC_WORKFLOW = """# Spec Workflow
+SPEC_WORKFLOW = """---
+language: en-US
+audience: agent
+doc_type: normative
+---
+
+# Spec Workflow
 
 ## When To Write A Spec
 
@@ -459,7 +557,13 @@ Use `docs/governance/multi-agent-spec-flow.md` when multiple agents or branches 
 """
 
 
-SPEC_PRODUCTION = """# Spec Production
+SPEC_PRODUCTION = """---
+language: en-US
+audience: agent
+doc_type: normative
+---
+
+# Spec Production
 
 Use this workflow when turning a fuzzy request, issue, or product idea into a repo-native spec.
 
@@ -554,7 +658,13 @@ Use `docs/governance/multi-agent-spec-flow.md` when more than one agent may impl
 """
 
 
-SPEC_ID_POLICY = """# Spec ID Policy
+SPEC_ID_POLICY = """---
+language: en-US
+audience: agent
+doc_type: normative
+---
+
+# Spec ID Policy
 
 ## Format
 
@@ -586,7 +696,13 @@ specs/adhoc-20260430-tdd-bootstrap/
 """
 
 
-SPEC_EXECUTION_STATUS = """# Spec Execution Status
+SPEC_EXECUTION_STATUS = """---
+language: en-US
+audience: agent
+doc_type: normative
+---
+
+# Spec Execution Status
 
 ## Principle
 
@@ -699,7 +815,13 @@ A spec can be marked `done` only when:
 """
 
 
-MULTI_AGENT_SPEC_FLOW = """# Multi-Agent Spec Flow
+MULTI_AGENT_SPEC_FLOW = """---
+language: en-US
+audience: agent
+doc_type: normative
+---
+
+# Multi-Agent Spec Flow
 
 Use this workflow when multiple agents, branches, or owners may implement the same spec in parallel.
 
@@ -790,7 +912,13 @@ def tdd_workflow(tdd: str) -> str:
         if tdd == "strict"
         else "TDD is recommended for behavior changes."
     )
-    return f"""# TDD Workflow
+    return f"""---
+language: en-US
+audience: agent
+doc_type: normative
+---
+
+# TDD Workflow
 
 {expectation}
 
@@ -827,7 +955,13 @@ Product behavior -> test plan -> red -> green -> refactor -> broaden -> validate
 """
 
 
-VALIDATION = """# Validation Workflow
+VALIDATION = """---
+language: en-US
+audience: agent
+doc_type: normative
+---
+
+# Validation Workflow
 
 ## Rule
 
@@ -870,7 +1004,13 @@ Record:
 """
 
 
-REVIEW = """# Review Workflow
+REVIEW = """---
+language: en-US
+audience: agent
+doc_type: normative
+---
+
+# Review Workflow
 
 ## Before Review
 
@@ -891,7 +1031,13 @@ If the template is missing, include at least: summary, spec link, validation, an
 """
 
 
-MAINTENANCE = """# Governance Maintenance
+MAINTENANCE = """---
+language: en-US
+audience: agent
+doc_type: normative
+---
+
+# Governance Maintenance
 
 ## Mandatory AGENTS.md Updates
 
@@ -912,7 +1058,13 @@ Update `AGENTS.md` in the same change when you:
 """
 
 
-SPECS_README = """# Specs
+SPECS_README = """---
+language: en-US
+audience: agent
+doc_type: router
+---
+
+# Specs
 
 Use `docs/governance/spec-production.md` for creating specs, `docs/governance/spec-workflow.md` for the spec lifecycle, `docs/governance/spec-id-policy.md` for id format, `docs/governance/spec-execution-status.md` for execution status, and `docs/governance/multi-agent-spec-flow.md` for parallel implementation.
 
@@ -929,7 +1081,13 @@ specs/<source>-<id>-<short-slug>/
 """
 
 
-PRODUCT = """# <Feature> Product Spec
+PRODUCT = """---
+language: en-US
+audience: mixed
+doc_type: spec
+---
+
+# <Feature> Product Spec
 
 ## Summary
 
@@ -943,7 +1101,13 @@ PRODUCT = """# <Feature> Product Spec
 """
 
 
-TECH = """# <Feature> Tech Spec
+TECH = """---
+language: en-US
+audience: agent
+doc_type: spec
+---
+
+# <Feature> Tech Spec
 
 Product spec: `./PRODUCT.md`
 
@@ -959,6 +1123,9 @@ Product spec: `./PRODUCT.md`
 
 STATUS = """---
 spec_id: <spec-id>
+language: en-US
+audience: agent
+doc_type: spec
 status: ready
 implementation: not_started
 validation: not_started
@@ -986,6 +1153,9 @@ Implementation has not started.
 
 WORKSTREAM = """---
 id: 01-implementation
+language: en-US
+audience: agent
+doc_type: spec
 status: ready
 owner: unassigned
 branch:
@@ -1032,7 +1202,13 @@ def pr_template(tdd: str) -> str:
         if tdd != "off"
         else ""
     )
-    return f"""## Summary
+    return f"""<!--
+language: en-US
+audience: mixed
+doc_type: template
+-->
+
+## Summary
 
 
 ## Spec
@@ -1053,6 +1229,7 @@ def pr_template(tdd: str) -> str:
 ## Documentation
 
 - Docs updated / N/A:
+- Language/audience/doc type declared:
 - Source of truth:
 - Routers or indexes updated:
 - Examples, commands, links, or generated docs checked:
