@@ -25,9 +25,11 @@ docs/governance/
   change-gate.md
   code-quality.md
   temp-artifacts.md
+  spec-production.md
   spec-workflow.md
   spec-id-policy.md
   spec-execution-status.md
+  multi-agent-spec-flow.md
   tdd-workflow.md
   validation-workflow.md
   review-workflow.md
@@ -70,6 +72,7 @@ specs/
    - Read `references/temp-artifacts.md` when screenshots, recordings, traces, logs, generated reports, debug dumps, or scratch files are produced.
    - Read `references/code-quality.md` when defining or auditing these rules.
 6. Separate product intent from implementation planning.
+   - Read `references/spec-production.md` when turning a request into a new or revised spec.
    - `PRODUCT.md`: user/API-visible behavior, testable invariants, goals, non-goals, open questions.
    - `TECH.md`: current code context, proposed changes, validation plan, risks, follow-ups.
 7. Use concrete spec ids.
@@ -81,6 +84,7 @@ specs/
    - Use `STATUS.md` for the overall spec board and `workstreams/*.md` for parallel execution.
    - Agents claim and update their own workstream files, then synchronize only their row in `STATUS.md`.
    - Read `references/spec-execution-status.md` when a spec has not started, is partially complete, is blocked, or has multiple agents working in parallel.
+   - Read `references/multi-agent-spec-flow.md` when multiple agents or branches implement the same spec.
 9. Treat TDD as a workflow, not a slogan.
    - The outer engineering loop is Plan -> Develop -> Verify -> Fix.
    - TDD is the inner loop inside Develop/Verify: product behavior -> test plan -> red -> green -> refactor -> broaden -> validate -> record.
@@ -137,9 +141,11 @@ Skip specs for narrow bug fixes, mechanical refactors, dependency bumps, or obvi
 - Read `references/change-gate.md` when adding or expanding any project surface.
 - Read `references/code-quality.md` when adding concrete code-quality review gates.
 - Read `references/temp-artifacts.md` when managing screenshots, logs, traces, reports, scratch files, or other temporary outputs.
+- Read `references/spec-production.md` when creating or revising `PRODUCT.md`, `TECH.md`, `STATUS.md`, or workstreams.
 - Read `references/spec-templates.md` when creating `PRODUCT.md` / `TECH.md` templates.
 - Read `references/spec-id-policy.md` when defining or reviewing spec id format.
 - Read `references/spec-execution-status.md` when managing spec lifecycle, partial implementation, or multi-agent workstreams.
+- Read `references/multi-agent-spec-flow.md` when coordinating parallel implementation by multiple agents.
 - Read `references/tdd-workflow.md` when adding TDD expectations.
 - Read `references/validation-patterns.md` when defining validation weight, UI-visible evidence, or repo-pattern-specific checks.
 - Read `references/universal-agent-init.md` when initializing Codex, Copilot, Claude, and Gemini context files together.

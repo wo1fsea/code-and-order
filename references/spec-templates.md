@@ -62,6 +62,7 @@ spec_id: <spec-id>
 status: ready
 implementation: not_started
 validation: not_started
+coordinator:
 updated: YYYY-MM-DD
 ---
 
@@ -71,9 +72,9 @@ updated: YYYY-MM-DD
 
 ## Workstreams
 
-| ID | Scope | Status | Owner | Branch / PR | Updated |
-|---|---|---|---|---|---|
-| 01 | Implementation | ready | unassigned | | |
+| ID | Scope | Status | Owner | Branch / PR | Depends on | Updated |
+|---|---|---|---|---|---|---|
+| 01 | Implementation | ready | unassigned | | | |
 
 ## Activity Log
 
@@ -91,6 +92,8 @@ branch:
 pr:
 files: []
 depends_on: []
+claimed_at:
+lease_expires_at:
 updated: YYYY-MM-DD
 ---
 
@@ -130,3 +133,7 @@ specs/adhoc-20260430-tdd-bootstrap/
 See `references/spec-id-policy.md` for the full policy.
 
 See `references/spec-execution-status.md` for lifecycle and workstream status rules.
+
+See `references/spec-production.md` for spec authoring flow.
+
+See `references/multi-agent-spec-flow.md` for parallel implementation flow.

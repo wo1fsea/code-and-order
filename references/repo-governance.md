@@ -23,6 +23,8 @@ Prefer a small number of clear layers:
 - Coordinated: active specs use `STATUS.md` and `workstreams/*.md` instead of hidden chat state.
 - Structural: code-quality rules require change gates before adding surface and reject dead code, non-orthogonal interfaces, hidden side effects, duplicate business rules, and permanent temporary layers.
 - Contained: temporary artifacts stay in ignored temp locations unless intentionally promoted.
+- Spec-producing: fuzzy requests become specs through clarification, product behavior, code inspection, technical planning, status initialization, and validation handoff.
+- Parallel-aware: multi-agent work uses claim, lease, release, blocked, validation, merge, and integrator handoff rules.
 
 ## Common Smells
 
@@ -40,6 +42,8 @@ Prefer a small number of clear layers:
 - New APIs, commands, configs, dependencies, docs, adapters, or agent entrypoints appear without explaining why existing paths were insufficient.
 - Screenshots, traces, logs, debug dumps, and scratch files appear in repo root or formal docs without promotion.
 - Compatibility layers, feature flags, configs, and TODOs have no owner or deletion condition.
+- Specs are created from implementation guesses before product behavior is clarified.
+- Multiple agents edit the same spec or files without claim, lease, dependency, or handoff records.
 
 ## Useful Readiness States
 

@@ -21,6 +21,8 @@ specs/<spec-id>/
 
 `workstreams/*.md` files are the concurrency unit. Agents should primarily update their own workstream file and synchronize only their row in `STATUS.md`.
 
+Use `references/multi-agent-spec-flow.md` when multiple agents or branches implement the same spec in parallel.
+
 ## Overall Spec Status
 
 Use these values for the frontmatter `status` field in `STATUS.md`:
@@ -52,9 +54,9 @@ Use this state machine for each `workstreams/*.md` file:
 
 ```text
 ready -> claimed -> in_progress -> implemented -> validating -> validated -> merged
-                      |              |
-                      v              v
-                   blocked       blocked
+           |             |              |
+           v             v              v
+        released      blocked        blocked
 ```
 
 Rules:
@@ -62,6 +64,7 @@ Rules:
 - `implemented` means code is written but validation is not complete.
 - `validated` means validation evidence exists but the work may not be merged.
 - `merged` means the workstream has landed in the target branch.
+- `released` means the claim was intentionally given up and the work can return to `ready`.
 - Do not use `done` for workstreams; it is too ambiguous.
 - Do not jump from `ready` to `merged`.
 
@@ -73,10 +76,12 @@ Before starting implementation, an agent must claim a workstream by updating its
 status: claimed
 owner: codex
 branch: codex/parser-work
+claimed_at: 2026-04-30T10:00:00+08:00
+lease_expires_at: 2026-04-30T12:00:00+08:00
 updated: 2026-04-30
 ```
 
-If the agent starts immediately, `in_progress` is acceptable. The claim must include owner and branch when known.
+If the agent starts immediately, `in_progress` is acceptable. The claim must include owner, branch when known, and a lease for parallel work.
 
 Do not take over another owner’s workstream unless the previous owner released it, the coordinator reassigned it, or the workstream is clearly stale by project policy.
 

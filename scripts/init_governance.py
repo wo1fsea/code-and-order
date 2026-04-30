@@ -46,8 +46,10 @@ Keep this file short. Put detailed rules in `docs/governance/` and use this file
 | Code structure, interfaces, dead code, dependencies, or compatibility layers | `docs/governance/code-quality.md` |
 | Screenshots, recordings, traces, logs, reports, debug dumps, or scratch files | `docs/governance/temp-artifacts.md` |
 | Ambiguous feature or cross-module change | `docs/governance/spec-workflow.md` |
+| Creating or revising specs | `docs/governance/spec-production.md` |
 | Choosing or reviewing a spec id | `docs/governance/spec-id-policy.md` |
 | Spec execution status or parallel workstreams | `docs/governance/spec-execution-status.md` |
+| Multi-agent parallel spec implementation | `docs/governance/multi-agent-spec-flow.md` |
 {tdd_row}| Validation or test reporting | `docs/governance/validation-workflow.md` |
 | PR or review prep | `docs/governance/review-workflow.md` |
 | Agent context files | `docs/governance/agent-context.md` |
@@ -377,6 +379,8 @@ specs/<spec-id>/
 
 `TECH.md` describes current code context, proposed changes, validation, risks, and follow-ups.
 
+Use `docs/governance/spec-production.md` when creating or revising spec files.
+
 ## Keep Specs Current
 
 If implementation changes user-visible behavior, update `PRODUCT.md`.
@@ -384,6 +388,103 @@ If implementation changes user-visible behavior, update `PRODUCT.md`.
 If implementation changes module boundaries, sequencing, validation, or risks, update `TECH.md`.
 
 Use `docs/governance/spec-execution-status.md` to manage not-started, partial, blocked, ready-review, and completed execution states.
+
+Use `docs/governance/multi-agent-spec-flow.md` when multiple agents or branches implement the same spec in parallel.
+"""
+
+
+SPEC_PRODUCTION = """# Spec Production
+
+Use this workflow when turning a fuzzy request, issue, or product idea into a repo-native spec.
+
+## Flow
+
+```text
+intake -> clarify -> classify -> assign spec id -> PRODUCT -> behavior review -> code inspection -> TECH -> STATUS/workstreams -> validation plan -> draft or ready
+```
+
+## Clarify Before Writing
+
+Ask concise questions when answers would change the spec:
+
+- Who is the user or caller?
+- What behavior changes?
+- What must not change?
+- What are the success criteria?
+- What failure, empty, loading, permission, cancellation, or rollback paths matter?
+- Which repo pattern and validation weight apply?
+- Does this need one workstream or parallel workstreams?
+
+Do not invent product intent when the answer would affect implementation.
+
+## PRODUCT First
+
+`PRODUCT.md` describes testable behavior, not implementation.
+
+Required sections:
+
+- Summary.
+- Goals and non-goals.
+- Behavior invariants as a numbered list.
+- States and edge cases.
+- Open questions.
+
+If product intent is not stable, keep the spec `draft`.
+
+## Inspect Code Before TECH
+
+`TECH.md` must be grounded in the actual repo.
+
+Inspect existing files, commands, tests, contracts, ownership boundaries, risks, and validation paths before proposing implementation.
+
+Apply `docs/governance/change-gate.md` before adding new surface.
+
+## STATUS And Workstreams
+
+For incomplete specs:
+
+```yaml
+status: draft
+implementation: not_started
+validation: not_started
+```
+
+For accepted specs ready to implement:
+
+```yaml
+status: ready
+implementation: not_started
+validation: not_started
+```
+
+Small specs can use `workstreams/01-implementation.md`.
+
+Parallel specs should split by ownership or dependency boundary, for example:
+
+```text
+workstreams/01-contract.md
+workstreams/02-core.md
+workstreams/03-ui.md
+workstreams/04-tests.md
+workstreams/05-docs.md
+```
+
+Use `docs/governance/multi-agent-spec-flow.md` when more than one agent may implement work in parallel.
+
+## Handoff
+
+```markdown
+## Spec Handoff
+
+- Spec path:
+- Status:
+- Spec type:
+- Open questions:
+- Workstreams:
+- Next owner:
+- Validation expectation:
+- Ready to implement: yes/no
+```
 """
 
 
@@ -442,6 +543,8 @@ specs/<spec-id>/
 
 `workstreams/*.md` files are the concurrency unit. Agents should primarily update their own workstream file and synchronize only their row in `STATUS.md`.
 
+Use `docs/governance/multi-agent-spec-flow.md` when multiple agents or branches implement the same spec in parallel.
+
 ## Overall Spec Status
 
 Use these values for the frontmatter `status` field in `STATUS.md`:
@@ -473,9 +576,9 @@ Use this state machine for each `workstreams/*.md` file:
 
 ```text
 ready -> claimed -> in_progress -> implemented -> validating -> validated -> merged
-                      |              |
-                      v              v
-                   blocked       blocked
+           |             |              |
+           v             v              v
+        released      blocked        blocked
 ```
 
 Rules:
@@ -483,12 +586,15 @@ Rules:
 - `implemented` means code is written but validation is not complete.
 - `validated` means validation evidence exists but the work may not be merged.
 - `merged` means the workstream has landed in the target branch.
+- `released` means the claim was intentionally given up and the work can return to `ready`.
 - Do not use `done` for workstreams; it is too ambiguous.
 - Do not jump from `ready` to `merged`.
 
 ## Claiming Work
 
 Before starting implementation, an agent must claim a workstream by updating its frontmatter with status, owner, branch when known, and updated date.
+
+For parallel work, include `claimed_at` and `lease_expires_at`.
 
 Do not take over another owner’s workstream unless the previous owner released it, the coordinator reassigned it, or the workstream is clearly stale by project policy.
 
@@ -524,6 +630,91 @@ A spec can be marked `done` only when:
 - `PRODUCT.md` describes the behavior that shipped.
 - `TECH.md` describes the implementation shape that landed.
 - Follow-ups are either complete, moved to a new spec/issue, or explicitly deferred.
+"""
+
+
+MULTI_AGENT_SPEC_FLOW = """# Multi-Agent Spec Flow
+
+Use this workflow when multiple agents, branches, or owners may implement the same spec in parallel.
+
+## Model
+
+```text
+Spec = product and technical intent plus overall status
+Workstream = concurrency unit owned by one agent or owner at a time
+Agent = claims and updates one workstream
+Integrator = coordinates conflicts, merge order, and final validation
+```
+
+## Workstream Status Machine
+
+```text
+ready -> claimed -> in_progress -> implemented -> validating -> validated -> merged
+           |             |              |
+           v             v              v
+        released      blocked        blocked
+```
+
+Do not use `done` for workstreams.
+
+## Claim And Lease
+
+Each workstream frontmatter should include:
+
+```yaml
+id: 01-contract
+status: claimed
+owner: agent-a
+branch: codex/gh-123/01-contract
+pr:
+files:
+  - src/api/*
+depends_on: []
+claimed_at: 2026-04-30T10:00:00+08:00
+lease_expires_at: 2026-04-30T12:00:00+08:00
+updated: 2026-04-30
+```
+
+Rules:
+
+- Claim before editing.
+- Use a lease so stale claims can be recovered.
+- Update `lease_expires_at` when continuing substantial work.
+- Do not take over another owner’s active lease without coordinator action or clear stale-policy evidence.
+- When releasing work, set status to `released`, record why, then coordinator or next owner can move it to `ready`.
+
+## Agent Update Rules
+
+- Update your workstream file first.
+- Update only your row in `STATUS.md`.
+- Do not rewrite the entire `STATUS.md` table.
+- Do not edit another agent’s workstream except for coordinator-approved handoff or mechanical conflict resolution.
+- Add an Activity Log entry for every status transition.
+
+## Dependency And Conflict Rules
+
+- Use `depends_on` for ordered work.
+- Shared contracts should usually be their own workstream, such as `01-contract.md`.
+- If two agents need the same files, split the workstream or appoint an integrator.
+- Contract changes must update `TECH.md` before dependent workstreams rely on them.
+
+## Integrator Flow
+
+```text
+draft/ready spec
+-> coordinator splits workstreams
+-> agents claim with leases
+-> agents implement and validate
+-> workstreams reach validated
+-> integrator checks conflicts and merge order
+-> workstreams merge
+-> full validation runs
+-> STATUS.md moves to ready-review
+-> review/merge
+-> STATUS.md moves to done
+```
+
+The overall spec can be `done` only when required workstreams are `merged`, validation is complete, specs match reality, and follow-ups are tracked or explicitly deferred.
 """
 
 
@@ -656,7 +847,7 @@ Update `AGENTS.md` in the same change when you:
 
 SPECS_README = """# Specs
 
-Use `docs/governance/spec-workflow.md` for the spec lifecycle, `docs/governance/spec-id-policy.md` for id format, and `docs/governance/spec-execution-status.md` for execution status.
+Use `docs/governance/spec-production.md` for creating specs, `docs/governance/spec-workflow.md` for the spec lifecycle, `docs/governance/spec-id-policy.md` for id format, `docs/governance/spec-execution-status.md` for execution status, and `docs/governance/multi-agent-spec-flow.md` for parallel implementation.
 
 Each substantial spec should live under:
 
@@ -704,6 +895,7 @@ spec_id: <spec-id>
 status: ready
 implementation: not_started
 validation: not_started
+coordinator:
 updated: YYYY-MM-DD
 ---
 
@@ -715,9 +907,9 @@ Implementation has not started.
 
 ## Workstreams
 
-| ID | Scope | Status | Owner | Branch / PR | Updated |
-|---|---|---|---|---|---|
-| 01 | Implementation | ready | unassigned | | |
+| ID | Scope | Status | Owner | Branch / PR | Depends on | Updated |
+|---|---|---|---|---|---|---|
+| 01 | Implementation | ready | unassigned | | | |
 
 ## Activity Log
 
@@ -733,6 +925,8 @@ branch:
 pr:
 files: []
 depends_on: []
+claimed_at:
+lease_expires_at:
 updated: YYYY-MM-DD
 ---
 
@@ -827,9 +1021,11 @@ def planned_files(root: Path, suite: str, tdd: str, spec_id: str) -> list[tuple[
         (root / "docs" / "governance" / "change-gate.md", CHANGE_GATE),
         (root / "docs" / "governance" / "code-quality.md", CODE_QUALITY),
         (root / "docs" / "governance" / "temp-artifacts.md", TEMP_ARTIFACTS),
+        (root / "docs" / "governance" / "spec-production.md", SPEC_PRODUCTION),
         (root / "docs" / "governance" / "spec-workflow.md", SPEC_WORKFLOW),
         (root / "docs" / "governance" / "spec-id-policy.md", SPEC_ID_POLICY),
         (root / "docs" / "governance" / "spec-execution-status.md", SPEC_EXECUTION_STATUS),
+        (root / "docs" / "governance" / "multi-agent-spec-flow.md", MULTI_AGENT_SPEC_FLOW),
         (root / "docs" / "governance" / "validation-workflow.md", VALIDATION),
         (root / "docs" / "governance" / "review-workflow.md", REVIEW),
         (root / "docs" / "governance" / "governance-maintenance.md", MAINTENANCE),
