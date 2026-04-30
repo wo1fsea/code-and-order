@@ -59,7 +59,7 @@ specs/
    - Add a `specs/` workflow only for ambiguous or cross-module work.
    - Add templates or checklists only when they remove repeated judgment calls.
 4. Add structural code-quality governance for code-change review gates.
-   - Focus on concrete rules: dead code removal, orthogonal interfaces, command/query separation, explicit state, side-effect boundaries, single source of truth, duplicate business-rule removal, dependency/config ownership, and compatibility-layer exit plans.
+   - Focus on concrete rules: change gates before adding surface, dead code removal, orthogonal interfaces, command/query separation, explicit state, side-effect boundaries, single source of truth, duplicate business-rule removal, dependency/config ownership, and compatibility-layer exit plans.
    - Read `references/code-quality.md` when defining or auditing these rules.
 5. Separate product intent from implementation planning.
    - `PRODUCT.md`: user/API-visible behavior, testable invariants, goals, non-goals, open questions.
