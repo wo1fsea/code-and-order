@@ -147,12 +147,13 @@ draft/ready spec
 -> STATUS.md moves to done
 ```
 
-Integrator responsibilities:
+Integrator or main-session responsibilities:
 
 - Confirm `PRODUCT.md` still describes intended behavior.
 - Confirm `TECH.md` matches implementation shape.
 - Resolve cross-workstream conflicts.
 - Run broad validation.
+- Perform final acceptance before the overall spec moves to `ready-review` or `done`.
 - Move unresolved follow-ups to new specs/issues or explicit deferrals.
 
 ## Done Criteria

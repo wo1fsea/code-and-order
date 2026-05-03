@@ -21,6 +21,8 @@ specs/<spec-id>/
 
 `workstreams/*.md` files are the concurrency unit. Agents should primarily update their own workstream file and synchronize only their row in `STATUS.md`.
 
+Use `references/spec-first-delivery.md` for coordinator handoff, subagent implementation, and main-session acceptance.
+
 Use `references/multi-agent-spec-flow.md` when multiple agents or branches implement the same spec in parallel.
 
 ## Overall Spec Status
@@ -122,6 +124,7 @@ A spec can be marked `done` only when:
 
 - Required implementation workstreams are `merged`.
 - Validation is complete and recorded.
+- The main session accepted the worker output and recorded acceptance evidence.
 - `PRODUCT.md` describes the behavior that shipped.
 - `TECH.md` describes the implementation shape that landed.
 - Follow-ups are either complete, moved to a new spec/issue, or explicitly deferred.

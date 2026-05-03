@@ -25,6 +25,7 @@ Prefer a small number of clear layers:
 - Structural: code-quality rules require change gates before adding surface and reject dead code, non-orthogonal interfaces, hidden side effects, duplicate business rules, and permanent temporary layers.
 - Contained: temporary artifacts stay in ignored temp locations unless intentionally promoted.
 - Spec-producing: fuzzy requests become specs through clarification, product behavior, code inspection, technical planning, status initialization, and validation handoff.
+- Spec-first: substantial project work starts from a spec, implementation is delegated to subagents or worker sessions, and the main session performs acceptance.
 - Parallel-aware: multi-agent work uses claim, lease, release, blocked, validation, merge, and integrator handoff rules.
 
 ## Common Smells
@@ -48,6 +49,7 @@ Prefer a small number of clear layers:
 - Screenshots, traces, logs, debug dumps, and scratch files appear in repo root or formal docs without promotion.
 - Compatibility layers, feature flags, configs, and TODOs have no owner or deletion condition.
 - Specs are created from implementation guesses before product behavior is clarified.
+- The main session implements substantial work and then self-accepts it without a separate worker handoff or acceptance pass.
 - Multiple agents edit the same spec or files without claim, lease, dependency, or handoff records.
 
 ## Useful Readiness States

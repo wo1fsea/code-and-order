@@ -12,7 +12,7 @@ Ask only what changes the output. Good questions:
 2. Should governance be `minimal`, `standard`, or `strict`?
 3. Which agent adapters are required: Codex `AGENTS.md`, Claude `CLAUDE.md`, Gemini `GEMINI.md`, GitHub Copilot, Cursor, or other?
 4. What are the canonical validation commands for this repo?
-5. Should specs and workstreams be created by default, or only when a task is ambiguous, cross-module, or high-risk?
+5. Specs and workstreams are the default for project work; which tiny or emergency exceptions should this repo allow?
 
 If the user asks for non-interactive initialization, infer a pattern from repo signals, state the assumption, and choose the lightest viable governance.
 
@@ -44,7 +44,8 @@ Default governance:
 
 Enable when needed:
 - TDD for behavior changes.
-- Specs only for ambiguous behavior, public CLI/API changes, or cross-module work.
+- Full workstream boards only for ambiguous behavior, public CLI/API changes, or cross-module work.
+- A lightweight spec still anchors project work before implementation.
 
 Avoid by default:
 - Full spec workstream boards.

@@ -79,6 +79,13 @@ updated: YYYY-MM-DD
 ## Activity Log
 
 - YYYY-MM-DD: status initialized.
+
+## Main Session Acceptance
+
+- Accepted by:
+- Diff reviewed:
+- Validation run:
+- Residual risk:
 ```
 
 ## Workstream
@@ -133,6 +140,8 @@ specs/adhoc-20260430-tdd-bootstrap/
 See `references/spec-id-policy.md` for the full policy.
 
 See `references/spec-execution-status.md` for lifecycle and workstream status rules.
+
+See `references/spec-first-delivery.md` for coordinator handoff, subagent implementation, and main-session acceptance.
 
 See `references/spec-production.md` for spec authoring flow.
 

@@ -52,6 +52,7 @@ Keep this file short. Put detailed rules in `docs/governance/` and use this file
 | Code structure, interfaces, dead code, dependencies, or compatibility layers | `docs/governance/code-quality.md` |
 | README, docs, examples, generated docs, specs, contributor guidance, or agent instructions | `docs/governance/documentation-standards.md` |
 | Screenshots, recordings, traces, logs, reports, debug dumps, or scratch files | `docs/governance/temp-artifacts.md` |
+| Spec-first project delivery, implementation handoff, or main-session acceptance | `docs/governance/spec-first-delivery.md` |
 | Ambiguous feature or cross-module change | `docs/governance/spec-workflow.md` |
 | Creating or revising specs | `docs/governance/spec-production.md` |
 | Choosing or reviewing a spec id | `docs/governance/spec-id-policy.md` |
@@ -71,6 +72,7 @@ Keep this file short. Put detailed rules in `docs/governance/` and use this file
 - New or substantially changed durable docs must declare `language`, `audience`, and `doc_type` near the top.
 - Agent-facing docs use English by default unless a local exception is explicit.
 - Do not duplicate long-lived documentation; keep one source of truth and route to it.
+- Subagents or worker sessions implement spec work; the main session accepts it.
 - Do not skip tests or validation silently. Record what ran and what did not.
 - Do not preserve dead code, stale flags, or compatibility paths without an owner and deletion condition.
 - Do not scatter temporary artifacts through the repo. Use `.out/` unless local rules say otherwise.
@@ -170,9 +172,9 @@ Use this loop for all non-trivial engineering work:
 Plan -> Develop -> Verify -> Fix
 ```
 
-1. Plan: read the relevant governance docs, decide whether a spec is needed, identify risk, and choose the smallest coherent task shape.
-2. Develop: make the change. When TDD applies, use `docs/governance/tdd-workflow.md` inside this phase.
-3. Verify: run narrow validation first, broaden when behavior or shared contracts changed, and record evidence. When TDD applies, the broaden/validate/record steps come from `docs/governance/tdd-workflow.md`.
+1. Plan: read the relevant governance docs, create or update the spec, identify risk, and choose the smallest coherent task shape.
+2. Develop: hand implementation to a subagent or worker session through `docs/governance/spec-first-delivery.md`. When TDD applies, use `docs/governance/tdd-workflow.md` inside this phase.
+3. Verify: the worker runs narrow validation, then the main session verifies and broadens when behavior or shared contracts changed. When TDD applies, the broaden/validate/record steps come from `docs/governance/tdd-workflow.md`.
 4. Fix: respond to failing tests, review feedback, or validation gaps. If reality changed, update specs or governance docs before repeating Develop/Verify.
 
 TDD is not a competing workflow. It is the inner loop used inside Develop and Verify when behavior changes call for it.
@@ -181,23 +183,27 @@ TDD is not a competing workflow. It is the inner loop used inside Develop and Ve
 
 1. Read `AGENTS.md`.
 2. Read the workflow file that matches the task.
-3. Inspect the existing code and tests before editing.
-4. If adding or expanding project surface, apply `docs/governance/change-gate.md`.
-5. For code changes, apply `docs/governance/code-quality.md`.
-6. For docs, examples, generated docs, specs, contributor guidance, or agent instructions, apply `docs/governance/documentation-standards.md`.
-7. If producing temporary artifacts, apply `docs/governance/temp-artifacts.md`.
-8. Make the smallest coherent change.
-9. Run the narrowest meaningful validation first.
-10. Broaden validation when behavior, contracts, docs, or shared modules changed.
-11. Record tests run, docs checked, tests skipped, and residual risk.
+3. Create or update the relevant spec before implementation, unless an explicit tiny or emergency exception applies.
+4. Split work into workstreams and hand implementation to a subagent or worker session.
+5. If adding or expanding project surface, apply `docs/governance/change-gate.md`.
+6. For code changes, apply `docs/governance/code-quality.md`.
+7. For docs, examples, generated docs, specs, contributor guidance, or agent instructions, apply `docs/governance/documentation-standards.md`.
+8. If producing temporary artifacts, apply `docs/governance/temp-artifacts.md`.
+9. Make the smallest coherent change in the worker/subagent pass.
+10. Run the narrowest meaningful validation first.
+11. Return a worker completion report.
+12. Main session reviews, validates, and accepts before marking the spec ready-review or done.
+13. Record tests run, docs checked, tests skipped, and residual risk.
 
-## Direct Implementation
+## Direct Implementation Exceptions
 
-Use direct implementation for narrow bug fixes, mechanical refactors, dependency bumps, documentation-only changes, or obvious single-file changes.
+Direct main-session implementation is an exception. Use it only for emergency fixes, unavailable subagent tooling with an explicit note, or tiny mechanical changes with no behavior, contract, or governance effect.
 
 ## Spec-Driven Implementation
 
 Use `docs/governance/spec-workflow.md` when behavior is ambiguous, user-visible, cross-module, or high risk.
+
+Use `docs/governance/spec-first-delivery.md` for the fixed coordinator -> worker -> acceptance flow.
 """
 
 
@@ -508,6 +514,120 @@ Use `.out/` by default:
 """
 
 
+SPEC_FIRST_DELIVERY = """---
+language: en-US
+audience: agent
+doc_type: normative
+---
+
+# Spec-First Delivery
+
+Project delivery is spec first by default. The main session owns intent, coordination, and acceptance. Subagents or worker sessions implement claimed workstreams and hand back evidence. Tiny mechanical changes and emergency fixes may use direct implementation only when the exception is explicitly recorded.
+
+## Fixed Flow
+
+```text
+main session intake
+-> PRODUCT.md
+-> TECH.md
+-> STATUS.md and workstreams
+-> subagent implementation
+-> subagent validation and handoff
+-> main session acceptance
+-> review or done
+```
+
+## Main Session
+
+The main session acts as coordinator and acceptor:
+
+- Clarify the request.
+- Produce or revise the spec before implementation.
+- Confirm `PRODUCT.md` behavior and non-goals.
+- Confirm `TECH.md` is grounded in the current repo.
+- Split work into workstreams.
+- Assign or launch subagents/worker sessions when implementation starts.
+- Review changed files and workstream evidence.
+- Run broad validation or verify that it was run.
+- Move the overall spec to `ready-review` or `done`.
+
+The main session should not quietly implement substantial spec work itself. If subagent execution is unavailable, record an exception and keep implementation and acceptance as separate passes.
+
+## Subagent Or Worker Session
+
+The subagent or worker session owns execution for a claimed workstream:
+
+- Read `AGENTS.md`, the spec, and relevant governance docs.
+- Claim exactly one workstream before editing.
+- Implement only the assigned scope.
+- Run narrow validation for the work.
+- Update the workstream file first.
+- Update only that row in `STATUS.md`.
+- Report changed files, validation, blockers, conflicts, residual risk, and handoff notes.
+
+The subagent does not mark the overall spec `done`.
+
+## Spec Readiness Gate
+
+Implementation cannot start until the spec has:
+
+- `PRODUCT.md` with observable behavior and non-goals.
+- `TECH.md` with current code context, proposed change shape, risks, and validation plan.
+- `STATUS.md` with `status: ready` or an explicitly accepted `active` state.
+- At least one workstream with owner, scope, dependencies, and validation expectations.
+- A main-session handoff note naming the worker/subagent scope.
+
+## Subagent Handoff
+
+```markdown
+## Subagent Handoff
+
+- Spec:
+- Workstream:
+- Scope:
+- Files or modules:
+- Must preserve:
+- Validation to run:
+- Do not touch:
+- Handoff back with:
+```
+
+## Worker Completion
+
+```markdown
+## Worker Completion
+
+- Workstream:
+- Status:
+- Files changed:
+- Validation run:
+- Validation not run:
+- Behavior/spec changes:
+- Conflicts or blockers:
+- Residual risk:
+- Suggested acceptance checks:
+```
+
+## Main Session Acceptance
+
+```markdown
+## Main Session Acceptance
+
+- Spec:
+- Workstreams accepted:
+- Diff reviewed:
+- Validation run:
+- Additional fixes required:
+- Status update:
+- Residual risk:
+```
+
+## Exceptions
+
+Direct main-session implementation is allowed only for emergency fixes, unavailable subagent tooling with an explicit note, or tiny mechanical changes with no behavior, contract, or governance effect. Even then, run a separate acceptance pass before marking work complete.
+"""
+
+
 SPEC_WORKFLOW = """---
 language: en-US
 audience: agent
@@ -542,6 +662,8 @@ specs/<spec-id>/
 `PRODUCT.md` describes user/API-visible behavior as testable invariants.
 
 `TECH.md` describes current code context, proposed changes, validation, risks, and follow-ups.
+
+Use `docs/governance/spec-first-delivery.md` for coordinator handoff, subagent implementation, and main-session acceptance.
 
 Use `docs/governance/spec-production.md` when creating or revising spec files.
 
@@ -654,6 +776,7 @@ Use `docs/governance/multi-agent-spec-flow.md` when more than one agent may impl
 - Next owner:
 - Validation expectation:
 - Ready to implement: yes/no
+- Subagent handoff required: yes/no
 ```
 """
 
@@ -1020,6 +1143,7 @@ doc_type: normative
 - Check `docs/governance/code-quality.md` for structural code-quality issues.
 - Check `docs/governance/documentation-standards.md` when docs, examples, generated docs, specs, contributor guidance, or agent instructions changed.
 - Check `docs/governance/temp-artifacts.md` when temporary outputs were produced.
+- Check `docs/governance/spec-first-delivery.md` when implementation was delegated to subagents or worker sessions.
 - Include validation evidence.
 - Call out risks, migrations, and follow-ups.
 
@@ -1066,7 +1190,7 @@ doc_type: router
 
 # Specs
 
-Use `docs/governance/spec-production.md` for creating specs, `docs/governance/spec-workflow.md` for the spec lifecycle, `docs/governance/spec-id-policy.md` for id format, `docs/governance/spec-execution-status.md` for execution status, and `docs/governance/multi-agent-spec-flow.md` for parallel implementation.
+Use `docs/governance/spec-first-delivery.md` for the fixed coordinator -> worker -> acceptance flow, `docs/governance/spec-production.md` for creating specs, `docs/governance/spec-workflow.md` for the spec lifecycle, `docs/governance/spec-id-policy.md` for id format, `docs/governance/spec-execution-status.md` for execution status, and `docs/governance/multi-agent-spec-flow.md` for parallel implementation.
 
 Each substantial spec should live under:
 
@@ -1148,6 +1272,13 @@ Implementation has not started.
 ## Activity Log
 
 - YYYY-MM-DD: status initialized.
+
+## Main Session Acceptance
+
+- Accepted by:
+- Diff reviewed:
+- Validation run:
+- Residual risk:
 """
 
 
@@ -1214,6 +1345,9 @@ doc_type: template
 ## Spec
 
 - Spec:
+- Spec-first workflow used:
+- Implementing subagent/workstream:
+- Main-session acceptance:
 
 ## Code Quality
 
@@ -1274,6 +1408,7 @@ def planned_files(root: Path, suite: str, tdd: str, spec_id: str) -> list[tuple[
         (root / "docs" / "governance" / "code-quality.md", CODE_QUALITY),
         (root / "docs" / "governance" / "documentation-standards.md", DOCUMENTATION_STANDARDS),
         (root / "docs" / "governance" / "temp-artifacts.md", TEMP_ARTIFACTS),
+        (root / "docs" / "governance" / "spec-first-delivery.md", SPEC_FIRST_DELIVERY),
         (root / "docs" / "governance" / "spec-production.md", SPEC_PRODUCTION),
         (root / "docs" / "governance" / "spec-workflow.md", SPEC_WORKFLOW),
         (root / "docs" / "governance" / "spec-id-policy.md", SPEC_ID_POLICY),

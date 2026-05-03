@@ -158,6 +158,8 @@ workstreams/04-tests.md
 workstreams/05-docs.md
 ```
 
+Use `references/spec-first-delivery.md` before implementation handoff.
+
 Use `references/multi-agent-spec-flow.md` when more than one agent may implement work in parallel.
 
 ## Define Validation
@@ -187,4 +189,5 @@ After producing or revising a spec, summarize:
 - Next owner:
 - Validation expectation:
 - Ready to implement: yes/no
+- Subagent handoff required: yes/no
 ```
