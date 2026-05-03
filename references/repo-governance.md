@@ -7,15 +7,17 @@ Prefer a small number of clear layers:
 1. `AGENTS.md` as the canonical router for all coding agents.
 2. Thin adapters (`CLAUDE.md`, `GEMINI.md`, `.github/copilot-instructions.md`) that import or point to `AGENTS.md`.
 3. `docs/governance/` for detailed workflows and checklists.
-4. `specs/` for substantial feature design and implementation plans.
-5. `.github/` templates for issue and pull request intake.
-6. `CONTRIBUTING.md` for public contributor flow and review expectations when the repo is open to contributors.
+4. `docs/governance/code-and-order.lock.json` for Code & Order source version, managed-file hashes, and update drift.
+5. `specs/` for substantial feature design and implementation plans.
+6. `.github/` templates for issue and pull request intake.
+7. `CONTRIBUTING.md` for public contributor flow and review expectations when the repo is open to contributors.
 
 ## Good Governance Properties
 
 - Local: rules live near the repo they govern.
 - Executable: rules tell an agent or human what to do next.
 - Current: rules are updated in the same change as workflow changes.
+- Traceable: generated governance records which Code & Order commit produced it and whether newer templates are available.
 - Minimal: rules avoid ceremony for simple changes.
 - Verifiable: important behavior maps to tests or manual validation.
 - Visual: UI-visible changes require screenshots or recordings unless explicitly not applicable.
@@ -34,6 +36,8 @@ Prefer a small number of clear layers:
 - `AGENTS.md` becomes a long handbook instead of a routing file.
 - Claude, Gemini, or Copilot adapter files copy rules that belong in `docs/governance/`.
 - A governance file was added, moved, or renamed without updating `AGENTS.md`.
+- A repo initialized with Code & Order has no lockfile, so agents cannot tell whether governance drift is local customization or upstream template drift.
+- Governance update tooling overwrites local project customizations instead of classifying them as `local-customized` or `needs-merge`.
 - Specs describe implementation before product behavior is agreed.
 - Spec execution status is tracked in chat, branch names, or moved directories instead of committed status files.
 - Pull requests require checkboxes no one actually uses.

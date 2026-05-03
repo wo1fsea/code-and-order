@@ -4,14 +4,24 @@
 from __future__ import annotations
 
 import argparse
+import hashlib
+import json
 import re
+import subprocess
+from datetime import datetime, timezone
 from pathlib import Path
+from typing import Any
 
 
 SPEC_ID_RE = re.compile(
     r"^(?:gh-\d+|linear-[a-z0-9]+-\d+|jira-[a-z0-9]+-\d+|rfc-\d{4}|adhoc-\d{8})"
     r"-[a-z0-9]+(?:-[a-z0-9]+)*$"
 )
+
+LOCK_RELATIVE_PATH = Path("docs/governance/code-and-order.lock.json")
+LOCK_SCHEMA_VERSION = 1
+SOURCE_REPO_FALLBACK = "https://github.com/wo1fsea/code-and-order"
+SOURCE_REF = "main"
 
 
 GITIGNORE = """.out/
@@ -61,7 +71,7 @@ Keep this file short. Put detailed rules in `docs/governance/` and use this file
 {tdd_row}| Validation or test reporting | `docs/governance/validation-workflow.md` |
 | PR or review prep | `docs/governance/review-workflow.md` |
 | Agent context files | `docs/governance/agent-context.md` |
-| Governance file changes | `docs/governance/governance-maintenance.md` |
+| Governance file changes, Code & Order version checks, or drift audits | `docs/governance/governance-maintenance.md` |
 
 ## Non-Negotiables
 
@@ -76,6 +86,7 @@ Keep this file short. Put detailed rules in `docs/governance/` and use this file
 - Do not skip tests or validation silently. Record what ran and what did not.
 - Do not preserve dead code, stale flags, or compatibility paths without an owner and deletion condition.
 - Do not scatter temporary artifacts through the repo. Use `.out/` unless local rules say otherwise.
+- Do not hand-edit `docs/governance/code-and-order.lock.json`; use the Code & Order initializer audit, adopt, or update modes.
 - Do not revert user changes unless explicitly asked.
 """
 
@@ -127,6 +138,8 @@ doc_type: router
 This directory holds the detailed engineering governance workflows.
 
 `AGENTS.md` is the canonical router. If files here are added, removed, renamed, or moved, update `AGENTS.md` in the same change.
+
+`code-and-order.lock.json` records which Code & Order version initialized or last updated managed governance files.
 """
 
 
@@ -1179,6 +1192,34 @@ Update `AGENTS.md` in the same change when you:
 - Typo fixes.
 - Examples inside an existing governance document.
 - Wording changes that do not alter routing, scope, or mandatory workflow.
+
+## Code & Order Provenance
+
+`docs/governance/code-and-order.lock.json` records:
+
+- Code & Order source repo, branch, and commit.
+- Initializer config such as suite, TDD mode, and starter spec id.
+- Managed governance files with template hashes and local hashes at write time.
+
+Use the initializer to manage the lockfile:
+
+```bash
+python scripts/init_governance.py . --audit
+python scripts/init_governance.py . --adopt
+python scripts/init_governance.py . --update --dry-run
+python scripts/init_governance.py . --update
+```
+
+## Drift Status
+
+- `current`: local file matches the managed template.
+- `upstream-available`: local file is unchanged locally and a newer template is available.
+- `local-customized`: local file differs from the managed template, while the template has not changed.
+- `needs-merge`: local file was customized and the template also changed.
+- `missing`: managed file is absent locally.
+- `new-template`: current Code & Order has a managed file not present in the lockfile.
+
+Safe updates may automatically refresh `upstream-available` files and create missing `new-template` files. They must not overwrite `local-customized` or `needs-merge` files.
 """
 
 
@@ -1389,6 +1430,321 @@ doc_type: template
 """
 
 
+def utc_now() -> str:
+    return datetime.now(timezone.utc).replace(microsecond=0).isoformat().replace(
+        "+00:00", "Z"
+    )
+
+
+def skill_root() -> Path:
+    return Path(__file__).resolve().parents[1]
+
+
+def git_output(args: list[str], cwd: Path) -> str | None:
+    try:
+        completed = subprocess.run(
+            ["git", *args],
+            cwd=cwd,
+            check=False,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.DEVNULL,
+        )
+    except OSError:
+        return None
+    if completed.returncode != 0:
+        return None
+    output = completed.stdout.strip()
+    return output or None
+
+
+def current_source_commit() -> str:
+    return git_output(["rev-parse", "HEAD"], skill_root()) or "unknown"
+
+
+def current_source_dirty() -> bool:
+    return git_output(["status", "--porcelain"], skill_root()) is not None
+
+
+def current_source_repo() -> str:
+    return (
+        git_output(["config", "--get", "remote.origin.url"], skill_root())
+        or SOURCE_REPO_FALLBACK
+    )
+
+
+def latest_source_commit(source_repo: str) -> str | None:
+    output = git_output(["ls-remote", source_repo, f"refs/heads/{SOURCE_REF}"], skill_root())
+    if not output:
+        return None
+    return output.split()[0]
+
+
+def hash_text(content: str) -> str:
+    return "sha256:" + hashlib.sha256(content.encode("utf-8")).hexdigest()
+
+
+def hash_file(path: Path) -> str | None:
+    if not path.exists():
+        return None
+    return "sha256:" + hashlib.sha256(path.read_bytes()).hexdigest()
+
+
+def template_id_for(relative_path: str) -> str:
+    return relative_path.replace("/", ":")
+
+
+def lock_path(root: Path) -> Path:
+    return root / LOCK_RELATIVE_PATH
+
+
+def load_lock(root: Path) -> dict[str, Any] | None:
+    path = lock_path(root)
+    if not path.exists():
+        return None
+    return json.loads(path.read_text(encoding="utf-8"))
+
+
+def write_lock(root: Path, lock: dict[str, Any]) -> None:
+    path = lock_path(root)
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(lock, indent=2, sort_keys=True) + "\n", encoding="utf-8")
+
+
+def planned_entries(root: Path, suite: str, tdd: str, spec_id: str) -> list[dict[str, Any]]:
+    entries = []
+    for path, content in planned_files(root, suite, tdd, spec_id):
+        relative_path = path.relative_to(root).as_posix()
+        entries.append(
+            {
+                "path": relative_path,
+                "template_id": template_id_for(relative_path),
+                "content": content,
+                "base_hash": hash_text(content),
+            }
+        )
+    return entries
+
+
+def lock_config(args: argparse.Namespace, existing: dict[str, Any] | None = None) -> dict[str, str]:
+    config = (existing or {}).get("config", {})
+    return {
+        "suite": config.get("suite", args.suite),
+        "tdd": config.get("tdd", args.tdd),
+        "spec_id": config.get("spec_id", args.spec_id),
+    }
+
+
+def managed_entry(
+    root: Path,
+    entry: dict[str, Any],
+    source_commit: str,
+    action: str,
+    base_hash: str | None = None,
+    base_source_commit: str | None = None,
+) -> dict[str, Any]:
+    path = root / entry["path"]
+    return {
+        "path": entry["path"],
+        "template_id": entry["template_id"],
+        "base_source_commit": base_source_commit or source_commit,
+        "base_hash": base_hash or entry["base_hash"],
+        "local_hash_at_write": hash_file(path),
+        "last_action": action,
+    }
+
+
+def build_lock(
+    root: Path,
+    args: argparse.Namespace,
+    actions: dict[str, str],
+    adopted: bool = False,
+    existing: dict[str, Any] | None = None,
+) -> dict[str, Any]:
+    config = lock_config(args, existing)
+    source_commit = current_source_commit()
+    now = utc_now()
+    entries = [
+        managed_entry(root, entry, source_commit, actions.get(entry["path"], "tracked"))
+        for entry in planned_entries(root, config["suite"], config["tdd"], config["spec_id"])
+    ]
+    return {
+        "schema_version": LOCK_SCHEMA_VERSION,
+        "tool": "code-and-order",
+        "source_repo": current_source_repo(),
+        "source_ref": SOURCE_REF,
+        "source_commit": source_commit,
+        "source_dirty": current_source_dirty(),
+        "initialized_at": (existing or {}).get("initialized_at", now),
+        "last_updated_at": now,
+        "adopted": adopted or (existing or {}).get("adopted", False),
+        "config": config,
+        "managed_files": entries,
+    }
+
+
+def analyze_lock(
+    root: Path,
+    lock: dict[str, Any],
+    config: dict[str, str],
+) -> list[dict[str, Any]]:
+    old_entries = {entry["path"]: entry for entry in lock.get("managed_files", [])}
+    results = []
+    for entry in planned_entries(root, config["suite"], config["tdd"], config["spec_id"]):
+        old = old_entries.get(entry["path"])
+        path = root / entry["path"]
+        local_hash = hash_file(path)
+        latest_hash = entry["base_hash"]
+        if old is None:
+            if local_hash is None:
+                status = "new-template"
+            elif local_hash == latest_hash:
+                status = "lock-outdated"
+            else:
+                status = "needs-adopt"
+        else:
+            old_hash = old.get("base_hash")
+            if local_hash is None:
+                status = "missing"
+            elif old_hash == latest_hash:
+                status = "current" if local_hash == latest_hash else "local-customized"
+            elif local_hash == old_hash:
+                status = "upstream-available"
+            elif local_hash == latest_hash:
+                status = "lock-outdated"
+            else:
+                status = "needs-merge"
+        results.append(
+            {
+                "path": entry["path"],
+                "template_id": entry["template_id"],
+                "content": entry["content"],
+                "latest_hash": latest_hash,
+                "local_hash": local_hash,
+                "old_entry": old,
+                "status": status,
+            }
+        )
+    return results
+
+
+def print_audit(root: Path, lock: dict[str, Any], config: dict[str, str]) -> None:
+    source_repo = lock.get("source_repo") or current_source_repo()
+    latest_commit = latest_source_commit(source_repo)
+    running_commit = current_source_commit()
+    print("Code & Order audit")
+    print(f"- Lockfile: {LOCK_RELATIVE_PATH.as_posix()}")
+    print(f"- Locked source: {lock.get('source_commit', 'unknown')}")
+    if lock.get("source_dirty"):
+        print("- Locked source dirty: true")
+    print(f"- Running source: {running_commit}")
+    if current_source_dirty():
+        print("- Running source dirty: true")
+    print(f"- Latest {SOURCE_REF}: {latest_commit or 'unknown'}")
+    if latest_commit and lock.get("source_commit") != latest_commit:
+        print("- Upstream: latest main differs from the lockfile source")
+    elif latest_commit:
+        print("- Upstream: lockfile source matches latest main")
+    else:
+        print("- Upstream: latest main could not be checked")
+
+    results = analyze_lock(root, lock, config)
+    counts: dict[str, int] = {}
+    for result in results:
+        counts[result["status"]] = counts.get(result["status"], 0) + 1
+
+    print("\nStatus summary:")
+    for status in sorted(counts):
+        print(f"- {status}: {counts[status]}")
+
+    print("\nManaged files:")
+    for result in results:
+        print(f"- [{result['status']}] {result['path']}")
+
+
+def update_from_lock(
+    root: Path,
+    lock: dict[str, Any],
+    config: dict[str, str],
+    dry_run: bool,
+) -> tuple[dict[str, Any], dict[str, int]]:
+    source_commit = current_source_commit()
+    old_entries = {entry["path"]: entry for entry in lock.get("managed_files", [])}
+    results = analyze_lock(root, lock, config)
+    counts: dict[str, int] = {}
+    new_entries = []
+
+    for result in results:
+        status = result["status"]
+        counts[status] = counts.get(status, 0) + 1
+        path = root / result["path"]
+        should_write = status in {"upstream-available", "new-template"}
+
+        if should_write and not dry_run:
+            path.parent.mkdir(parents=True, exist_ok=True)
+            path.write_text(result["content"], encoding="utf-8")
+            status = "updated" if result["old_entry"] else "created"
+
+        if status in {"updated", "created", "current", "lock-outdated"}:
+            new_entries.append(
+                managed_entry(
+                    root,
+                    {
+                        "path": result["path"],
+                        "template_id": result["template_id"],
+                        "base_hash": result["latest_hash"],
+                    },
+                    source_commit,
+                    status,
+                )
+            )
+        else:
+            old = old_entries.get(result["path"])
+            if old:
+                new_entries.append(
+                    managed_entry(
+                        root,
+                        {
+                            "path": result["path"],
+                            "template_id": result["template_id"],
+                            "base_hash": result["latest_hash"],
+                        },
+                        source_commit,
+                        status,
+                        base_hash=old.get("base_hash"),
+                        base_source_commit=old.get("base_source_commit"),
+                    )
+                )
+            else:
+                new_entries.append(
+                    managed_entry(
+                        root,
+                        {
+                            "path": result["path"],
+                            "template_id": result["template_id"],
+                            "base_hash": result["latest_hash"],
+                        },
+                        source_commit,
+                        status,
+                    )
+                )
+
+    new_lock = {
+        "schema_version": LOCK_SCHEMA_VERSION,
+        "tool": "code-and-order",
+        "source_repo": lock.get("source_repo") or current_source_repo(),
+        "source_ref": lock.get("source_ref") or SOURCE_REF,
+        "source_commit": source_commit,
+        "source_dirty": current_source_dirty(),
+        "initialized_at": lock.get("initialized_at", utc_now()),
+        "last_updated_at": utc_now(),
+        "adopted": lock.get("adopted", False),
+        "config": config,
+        "managed_files": new_entries,
+    }
+    return new_lock, counts
+
+
 def write_if_missing(path: Path, content: str) -> bool:
     if path.exists():
         return False
@@ -1447,6 +1803,26 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("repo", nargs="?", default=".", help="Repository root")
     parser.add_argument(
+        "--audit",
+        action="store_true",
+        help="Report Code & Order lockfile drift without writing files",
+    )
+    parser.add_argument(
+        "--adopt",
+        action="store_true",
+        help="Write a lockfile for existing governance files without changing them",
+    )
+    parser.add_argument(
+        "--update",
+        action="store_true",
+        help="Safely update unchanged managed governance files to this Code & Order version",
+    )
+    parser.add_argument(
+        "--dry-run",
+        action="store_true",
+        help="Preview --update without writing managed files or the lockfile",
+    )
+    parser.add_argument(
         "--suite",
         choices=["minimal", "universal"],
         default="universal",
@@ -1465,6 +1841,12 @@ def main() -> int:
     )
     args = parser.parse_args()
 
+    selected_modes = sum([args.audit, args.adopt, args.update])
+    if selected_modes > 1:
+        parser.error("choose only one of --audit, --adopt, or --update")
+    if args.dry_run and not args.update:
+        parser.error("--dry-run only applies to --update")
+
     if not SPEC_ID_RE.match(args.spec_id):
         parser.error(
             "--spec-id must match examples like gh-123-feature, "
@@ -1473,14 +1855,69 @@ def main() -> int:
         )
 
     root = Path(args.repo).resolve()
+
+    existing_lock = load_lock(root)
+    config = lock_config(args, existing_lock)
+
+    if args.audit:
+        if not existing_lock:
+            print(
+                "No Code & Order lockfile found. "
+                "Run with --adopt to start tracking existing governance files."
+            )
+            return 0
+        print_audit(root, existing_lock, config)
+        return 0
+
+    if args.adopt:
+        actions = {}
+        for entry in planned_entries(root, config["suite"], config["tdd"], config["spec_id"]):
+            actions[entry["path"]] = "adopted" if (root / entry["path"]).exists() else "missing"
+        write_lock(root, build_lock(root, args, actions, adopted=True, existing=existing_lock))
+        print(f"Adopted governance tracking in {LOCK_RELATIVE_PATH.as_posix()}")
+        print_audit(root, load_lock(root) or {}, config)
+        return 0
+
+    if args.update:
+        if not existing_lock:
+            print(
+                "No Code & Order lockfile found. "
+                "Run with --adopt before using --update."
+            )
+            return 1
+        new_lock, counts = update_from_lock(root, existing_lock, config, args.dry_run)
+        if not args.dry_run:
+            write_lock(root, new_lock)
+        print("Update summary:" if not args.dry_run else "Update dry run summary:")
+        for status in sorted(counts):
+            print(f"- {status}: {counts[status]}")
+        if args.dry_run:
+            print("No files written.")
+        else:
+            print(f"Updated {LOCK_RELATIVE_PATH.as_posix()}")
+        return 0
+
     created = []
     skipped = []
+    actions = {}
 
     for path, content in planned_files(root, args.suite, args.tdd, args.spec_id):
+        relative_path = path.relative_to(root).as_posix()
         if write_if_missing(path, content):
             created.append(path)
+            actions[relative_path] = "created"
         else:
             skipped.append(path)
+            actions[relative_path] = "skipped"
+
+    if not existing_lock:
+        write_lock(root, build_lock(root, args, actions))
+        created.append(lock_path(root))
+    else:
+        print(
+            f"Existing {LOCK_RELATIVE_PATH.as_posix()} left unchanged. "
+            "Use --audit or --update for managed governance maintenance."
+        )
 
     if created:
         print("Created:")

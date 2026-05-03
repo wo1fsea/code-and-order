@@ -21,6 +21,7 @@ AGENTS.md                         # canonical router, not a long handbook
 CLAUDE.md                         # thin adapter pointing to AGENTS.md
 GEMINI.md                         # thin adapter pointing to AGENTS.md
 .github/copilot-instructions.md   # thin Copilot adapter pointing to AGENTS.md
+docs/governance/code-and-order.lock.json
 docs/governance/
   README.md
   agent-context.md
@@ -109,7 +110,12 @@ specs/
 13. Maintain the router.
    - When adding, deleting, renaming, or moving governance files, update `AGENTS.md` in the same change.
    - When changing which workflow applies to a task type, update the `AGENTS.md` governance map in the same change.
-14. Validate the result.
+14. Track Code & Order provenance.
+   - Initialized repos should have `docs/governance/code-and-order.lock.json`.
+   - Use `scripts/init_governance.py . --audit` to compare the tracked governance baseline with the running Code & Order templates and latest `main`.
+   - Use `--adopt` for repos initialized before lockfiles existed.
+   - Use `--update` only for safe refreshes; customized files that also changed upstream require manual merge.
+15. Validate the result.
    - Confirm links and paths work.
    - Confirm setup/test commands are discoverable.
    - For UI-visible changes, require visual evidence or an explicit not-applicable note.
@@ -127,6 +133,15 @@ python scripts/init_governance.py . \
   --spec-id rfc-0001-initial-governance
 ```
 
+Maintenance modes:
+
+```bash
+python scripts/init_governance.py . --audit
+python scripts/init_governance.py . --adopt
+python scripts/init_governance.py . --update --dry-run
+python scripts/init_governance.py . --update
+```
+
 Modes:
 
 - `--suite minimal`: `AGENTS.md`, core governance docs, and starter specs.
@@ -134,6 +149,9 @@ Modes:
 - `--tdd off`: no TDD-specific workflow.
 - `--tdd standard`: TDD guidance is recommended.
 - `--tdd strict`: TDD evidence is expected for behavior changes.
+- `--audit`: report Code & Order source-version and file drift without writing files.
+- `--adopt`: write `docs/governance/code-and-order.lock.json` for existing governance files.
+- `--update`: refresh unchanged managed files and leave customized conflicts for manual merge.
 
 ## Spec-First Default
 
