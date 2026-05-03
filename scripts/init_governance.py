@@ -1610,7 +1610,7 @@ doc_type: template
 {tdd_section}
 ## Risk
 
-- 
+-
 """
 
 
