@@ -62,6 +62,7 @@ Keep this file short. Put detailed rules in `docs/governance/` and use this file
 | Code structure, interfaces, dead code, dependencies, or compatibility layers | `docs/governance/code-quality.md` |
 | README, docs, examples, generated docs, specs, contributor guidance, or agent instructions | `docs/governance/documentation-standards.md` |
 | Screenshots, recordings, traces, logs, reports, debug dumps, or scratch files | `docs/governance/temp-artifacts.md` |
+| Bug fixes, small behavior tweaks, or direct implementation exceptions | `docs/governance/compact-specs.md` |
 | Spec-first project delivery, implementation handoff, or main-session acceptance | `docs/governance/spec-first-delivery.md` |
 | Ambiguous feature or cross-module change | `docs/governance/spec-workflow.md` |
 | Creating or revising specs | `docs/governance/spec-production.md` |
@@ -82,6 +83,7 @@ Keep this file short. Put detailed rules in `docs/governance/` and use this file
 - New or substantially changed durable docs must declare `language`, `audience`, and `doc_type` near the top.
 - Agent-facing docs use English by default unless a local exception is explicit.
 - Do not duplicate long-lived documentation; keep one source of truth and route to it.
+- Bug fixes and small tweaks use compact specs unless the change is purely mechanical with no behavior, contract, data, UI, test, or governance impact.
 - Subagents or worker sessions implement spec work; the main session accepts it.
 - Do not skip tests or validation silently. Record what ran and what did not.
 - Do not preserve dead code, stale flags, or compatibility paths without an owner and deletion condition.
@@ -527,6 +529,173 @@ Use `.out/` by default:
 """
 
 
+COMPACT_SPECS = """---
+language: en-US
+audience: agent
+doc_type: normative
+---
+
+# Compact Specs
+
+Use compact specs for bug fixes and small behavior tweaks. They keep spec-first delivery lightweight while preserving intent, boundaries, and validation evidence.
+
+## Rule
+
+Bug fixes and small tweaks still use spec-first when they affect behavior, contracts, UI, data, configuration, permissions, tests, or governance.
+
+Use a direct implementation exception only for purely mechanical changes with no behavior, contract, data, UI, test, or governance effect.
+
+## Shape
+
+Keep the normal spec directory, but make the content short:
+
+```text
+specs/<spec-id>/
+  PRODUCT.md
+  TECH.md
+  STATUS.md
+  workstreams/
+    01-fix.md
+```
+
+For small tweaks, use `workstreams/01-tweak.md` when clearer.
+
+## Bug Fix PRODUCT.md
+
+Write bug fix specs as restored behavior, not as new functionality:
+
+```markdown
+# Bugfix Behavior Spec
+
+## Observed
+
+What currently fails.
+
+## Expected
+
+What behavior should be restored.
+
+## Regression Invariant
+
+The condition that must not break again.
+
+## Reproduction
+
+1. Step.
+2. Step.
+
+## Non-Goals
+
+- Do not redesign unrelated behavior.
+- Do not change public contracts unless explicitly required.
+```
+
+## Bug Fix TECH.md
+
+```markdown
+# Bugfix Tech Spec
+
+## Suspected Area
+
+- Files, modules, commands, or contracts likely involved.
+
+## Change Shape
+
+- Smallest intended fix.
+- Regression test to add or update.
+- Public API, data, UI, and config surfaces that must stay unchanged.
+
+## Validation
+
+- Narrow command:
+- Regression command:
+- Manual or visual check:
+
+## Risk
+
+- Why this fix could break adjacent behavior.
+```
+
+## Small Tweak PRODUCT.md
+
+Use for copy, default values, narrow UI states, sorting, labels, small interaction changes, and other intentional but limited behavior changes.
+
+```markdown
+# Small Tweak Behavior Spec
+
+## Current
+
+Existing behavior.
+
+## Desired
+
+New narrow behavior.
+
+## Acceptance
+
+- Observable result.
+- Existing behavior to preserve.
+
+## Affected Surface
+
+- UI, API, config, docs, or command surface affected.
+
+## Non-Goals
+
+- Do not expand scope.
+- Do not redesign or refactor unrelated areas.
+```
+
+## Small Tweak TECH.md
+
+```markdown
+# Small Tweak Tech Spec
+
+## Files Or Modules
+
+- Expected touch points.
+
+## Change Shape
+
+- Smallest change.
+- Surfaces that must remain unchanged.
+
+## Validation
+
+- Automated check:
+- Manual check:
+- Visual evidence when UI-visible:
+```
+
+## Direct Implementation Exception
+
+Do not create a full spec only when the change is purely mechanical. Record the exception in the handoff, PR, or implementation log:
+
+```markdown
+## Direct Implementation Exception
+
+- Reason: tiny mechanical change
+- Behavior impact: none
+- Contract impact: none
+- Data/UI/test/governance impact: none
+- Files:
+- Validation:
+- Main-session acceptance:
+```
+
+If any impact field is not `none`, use a compact spec.
+
+## Acceptance
+
+The main session accepts compact spec work by checking:
+
+- The fix or tweak matches `PRODUCT.md`.
+- The implementation stayed within `TECH.md` and non-goals.
+- Regression or acceptance evidence was recorded.
+- No extra surface, refactor, or behavior expansion slipped in.
+"""
+
+
 SPEC_FIRST_DELIVERY = """---
 language: en-US
 audience: agent
@@ -536,6 +705,8 @@ doc_type: normative
 # Spec-First Delivery
 
 Project delivery is spec first by default. The main session owns intent, coordination, and acceptance. Subagents or worker sessions implement claimed workstreams and hand back evidence. Tiny mechanical changes and emergency fixes may use direct implementation only when the exception is explicitly recorded.
+
+Use `docs/governance/compact-specs.md` for bug fixes and small tweaks that need a thin spec rather than a full feature spec.
 
 ## Fixed Flow
 
@@ -638,6 +809,8 @@ Implementation cannot start until the spec has:
 ## Exceptions
 
 Direct main-session implementation is allowed only for emergency fixes, unavailable subagent tooling with an explicit note, or tiny mechanical changes with no behavior, contract, or governance effect. Even then, run a separate acceptance pass before marking work complete.
+
+Bug fixes and small tweaks are not direct-implementation exceptions by default. If they affect behavior, contracts, UI, data, configuration, permissions, tests, or governance, create a compact spec.
 """
 
 
@@ -659,7 +832,7 @@ Write a spec before implementation when at least one is true:
 - A coding agent needs stable product intent before implementation.
 - Reviewers need to approve direction before code churn begins.
 
-Skip specs for narrow bug fixes, mechanical refactors, dependency bumps, or obvious single-file changes.
+Use `docs/governance/compact-specs.md` for bug fixes and small behavior tweaks. Skip full specs only for direct implementation exceptions: purely mechanical changes with no behavior, contract, data, UI, test, or governance effect.
 
 ## Required Files
 
@@ -677,6 +850,8 @@ specs/<spec-id>/
 `TECH.md` describes current code context, proposed changes, validation, risks, and follow-ups.
 
 Use `docs/governance/spec-first-delivery.md` for coordinator handoff, subagent implementation, and main-session acceptance.
+
+Use `docs/governance/compact-specs.md` for bug fix and small tweak specs.
 
 Use `docs/governance/spec-production.md` when creating or revising spec files.
 
@@ -701,6 +876,8 @@ doc_type: normative
 # Spec Production
 
 Use this workflow when turning a fuzzy request, issue, or product idea into a repo-native spec.
+
+Use `docs/governance/compact-specs.md` when the request is a bug fix or small tweak.
 
 ## Flow
 
@@ -735,6 +912,10 @@ Required sections:
 - Open questions.
 
 If product intent is not stable, keep the spec `draft`.
+
+For bug fixes, write restored behavior: observed, expected, regression invariant, reproduction, and non-goals.
+
+For small tweaks, write current behavior, desired behavior, acceptance, affected surface, and non-goals.
 
 ## Inspect Code Before TECH
 
@@ -775,6 +956,8 @@ workstreams/05-docs.md
 ```
 
 Use `docs/governance/multi-agent-spec-flow.md` when more than one agent may implement work in parallel.
+
+Use `docs/governance/compact-specs.md` for compact bug fix and small tweak templates.
 
 ## Handoff
 
@@ -1231,7 +1414,7 @@ doc_type: router
 
 # Specs
 
-Use `docs/governance/spec-first-delivery.md` for the fixed coordinator -> worker -> acceptance flow, `docs/governance/spec-production.md` for creating specs, `docs/governance/spec-workflow.md` for the spec lifecycle, `docs/governance/spec-id-policy.md` for id format, `docs/governance/spec-execution-status.md` for execution status, and `docs/governance/multi-agent-spec-flow.md` for parallel implementation.
+Use `docs/governance/spec-first-delivery.md` for the fixed coordinator -> worker -> acceptance flow, `docs/governance/compact-specs.md` for bug fix and small tweak specs, `docs/governance/spec-production.md` for creating specs, `docs/governance/spec-workflow.md` for the spec lifecycle, `docs/governance/spec-id-policy.md` for id format, `docs/governance/spec-execution-status.md` for execution status, and `docs/governance/multi-agent-spec-flow.md` for parallel implementation.
 
 Each substantial spec should live under:
 
@@ -1386,6 +1569,7 @@ doc_type: template
 ## Spec
 
 - Spec:
+- Compact spec or direct exception:
 - Spec-first workflow used:
 - Implementing subagent/workstream:
 - Main-session acceptance:
@@ -1764,6 +1948,7 @@ def planned_files(root: Path, suite: str, tdd: str, spec_id: str) -> list[tuple[
         (root / "docs" / "governance" / "code-quality.md", CODE_QUALITY),
         (root / "docs" / "governance" / "documentation-standards.md", DOCUMENTATION_STANDARDS),
         (root / "docs" / "governance" / "temp-artifacts.md", TEMP_ARTIFACTS),
+        (root / "docs" / "governance" / "compact-specs.md", COMPACT_SPECS),
         (root / "docs" / "governance" / "spec-first-delivery.md", SPEC_FIRST_DELIVERY),
         (root / "docs" / "governance" / "spec-production.md", SPEC_PRODUCTION),
         (root / "docs" / "governance" / "spec-workflow.md", SPEC_WORKFLOW),

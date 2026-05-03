@@ -42,6 +42,7 @@ Classify the spec:
 
 - `feature`: new user/API-visible behavior.
 - `bugfix`: incorrect existing behavior with reproduction evidence.
+- `small-tweak`: narrow intentional change to existing behavior, UI, copy, defaults, config, docs, or tests.
 - `refactor`: implementation change intended to preserve behavior.
 - `migration`: data, schema, storage, or compatibility transition.
 - `governance`: repo rules, workflow, templates, or agent guidance.
@@ -159,6 +160,8 @@ workstreams/05-docs.md
 ```
 
 Use `references/spec-first-delivery.md` before implementation handoff.
+
+Use `references/compact-specs.md` for bug fixes and small tweaks.
 
 Use `references/multi-agent-spec-flow.md` when more than one agent may implement work in parallel.
 

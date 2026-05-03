@@ -46,6 +46,7 @@ Enable when needed:
 - TDD for behavior changes.
 - Full workstream boards only for ambiguous behavior, public CLI/API changes, or cross-module work.
 - A lightweight spec still anchors project work before implementation.
+- Compact specs for bug fixes and small tweaks.
 
 Avoid by default:
 - Full spec workstream boards.

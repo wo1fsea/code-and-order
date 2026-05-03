@@ -30,6 +30,7 @@ docs/governance/
   code-quality.md
   documentation-standards.md
   temp-artifacts.md
+  compact-specs.md
   spec-first-delivery.md
   spec-production.md
   spec-workflow.md
@@ -85,37 +86,41 @@ specs/
    - Main session owns intake, spec production, workstream split, and final acceptance.
    - Subagents or worker sessions implement claimed workstreams and hand back evidence.
    - Read `references/spec-first-delivery.md` before implementing project work except explicit direct-implementation exceptions.
-8. Separate product intent from implementation planning.
+8. Use compact specs for bug fixes and small tweaks.
+   - Bug fixes focus on observed behavior, expected behavior, regression invariant, reproduction, non-goals, and regression validation.
+   - Small tweaks focus on current behavior, desired behavior, acceptance, affected surface, and non-goals.
+   - Read `references/compact-specs.md` before treating a bug fix, UI copy/default tweak, or narrow behavior adjustment as too small for a spec.
+9. Separate product intent from implementation planning.
    - Read `references/spec-production.md` when turning a request into a new or revised spec.
    - `PRODUCT.md`: user/API-visible behavior, testable invariants, goals, non-goals, open questions.
    - `TECH.md`: current code context, proposed changes, validation plan, risks, follow-ups.
-9. Use concrete spec ids.
+10. Use concrete spec ids.
    - Preferred shape: `specs/<source>-<id>-<short-slug>/`.
    - Examples: `gh-123-open-file-tilde`, `linear-app-1066-agent-autonomy`, `rfc-0001-repo-governance`, `adhoc-20260430-tdd-bootstrap`.
    - Read `references/spec-id-policy.md` before inventing a new policy.
-10. Manage execution status explicitly.
+11. Manage execution status explicitly.
    - Do not encode status in directory names.
    - Use `STATUS.md` for the overall spec board and `workstreams/*.md` for parallel execution.
    - Agents claim and update their own workstream files, then synchronize only their row in `STATUS.md`.
    - Read `references/spec-execution-status.md` when a spec has not started, is partially complete, is blocked, or has multiple agents working in parallel.
    - Read `references/multi-agent-spec-flow.md` when multiple agents or branches implement the same spec.
-11. Treat TDD as a workflow, not a slogan.
+12. Treat TDD as a workflow, not a slogan.
    - The outer engineering loop is Plan -> Develop -> Verify -> Fix.
    - TDD is the inner loop inside Develop/Verify: product behavior -> test plan -> red -> green -> refactor -> broaden -> validate -> record.
    - Do not present TDD as a competing workflow.
    - Read `references/tdd-workflow.md` when defining or auditing TDD rules.
-12. Tie every rule to a decision point.
+13. Tie every rule to a decision point.
    - A good rule tells the next human or agent what to do differently.
    - Delete or compress rules that only restate common sense.
-13. Maintain the router.
+14. Maintain the router.
    - When adding, deleting, renaming, or moving governance files, update `AGENTS.md` in the same change.
    - When changing which workflow applies to a task type, update the `AGENTS.md` governance map in the same change.
-14. Track Code & Order provenance.
+15. Track Code & Order provenance.
    - Initialized repos should have `docs/governance/code-and-order.lock.json`.
    - Use `scripts/init_governance.py . --audit` to compare the tracked governance baseline with the running Code & Order templates and latest `main`.
    - Use `--adopt` for repos initialized before lockfiles existed.
    - Use `--update` only for safe refreshes; customized files that also changed upstream require manual merge.
-15. Validate the result.
+16. Validate the result.
    - Confirm links and paths work.
    - Confirm setup/test commands are discoverable.
    - For UI-visible changes, require visual evidence or an explicit not-applicable note.
@@ -167,6 +172,8 @@ This is required when at least one is true:
 
 Direct main-session implementation is an exception for emergency fixes, unavailable subagent tooling with an explicit note, or tiny mechanical changes with no behavior, contract, or governance effect.
 
+Bug fixes and small tweaks are not automatically direct-implementation exceptions. Use compact specs for behavior fixes, UI-visible tweaks, defaults, config changes, tests with behavior meaning, docs that change user guidance, and narrow interaction changes.
+
 ## References
 
 - Read `references/repo-governance.md` when designing or auditing a repo governance layout.
@@ -175,6 +182,7 @@ Direct main-session implementation is an exception for emergency fixes, unavaila
 - Read `references/code-quality.md` when adding concrete code-quality review gates.
 - Read `references/documentation-standards.md` when adding, moving, deleting, auditing, or updating docs, examples, generated docs, contributor guidance, specs, or agent instructions.
 - Read `references/temp-artifacts.md` when managing screenshots, logs, traces, reports, scratch files, or other temporary outputs.
+- Read `references/compact-specs.md` when a bug fix or small tweak needs a lightweight spec instead of a full feature spec.
 - Read `references/spec-first-delivery.md` when enforcing the fixed spec-first -> subagent implementation -> main-session acceptance flow.
 - Read `references/spec-production.md` when creating or revising `PRODUCT.md`, `TECH.md`, `STATUS.md`, or workstreams.
 - Read `references/spec-templates.md` when creating `PRODUCT.md` / `TECH.md` templates.

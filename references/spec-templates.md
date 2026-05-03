@@ -25,6 +25,38 @@ One to three sentences describing the desired outcome.
 - 
 ```
 
+## Compact Bug Fix PRODUCT.md
+
+```markdown
+# Bugfix Behavior Spec
+
+## Observed
+
+## Expected
+
+## Regression Invariant
+
+## Reproduction
+
+## Non-Goals
+```
+
+## Compact Small Tweak PRODUCT.md
+
+```markdown
+# Small Tweak Behavior Spec
+
+## Current
+
+## Desired
+
+## Acceptance
+
+## Affected Surface
+
+## Non-Goals
+```
+
 ## TECH.md
 
 ```markdown
@@ -52,6 +84,22 @@ Product spec: `./PRODUCT.md`
 
 - Risk:
 - Follow-up:
+```
+
+## Compact TECH.md
+
+```markdown
+# Compact Tech Spec
+
+Product spec: `./PRODUCT.md`
+
+## Files Or Modules
+
+## Change Shape
+
+## Validation
+
+## Risk
 ```
 
 ## STATUS.md
@@ -140,6 +188,8 @@ specs/adhoc-20260430-tdd-bootstrap/
 See `references/spec-id-policy.md` for the full policy.
 
 See `references/spec-execution-status.md` for lifecycle and workstream status rules.
+
+See `references/compact-specs.md` for bug fix and small tweak spec templates.
 
 See `references/spec-first-delivery.md` for coordinator handoff, subagent implementation, and main-session acceptance.
 
