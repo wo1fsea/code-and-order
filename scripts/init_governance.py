@@ -62,6 +62,7 @@ Keep this file short. Put detailed rules in `docs/governance/` and use this file
 | Code structure, interfaces, dead code, dependencies, or compatibility layers | `docs/governance/code-quality.md` |
 | README, docs, examples, generated docs, specs, contributor guidance, or agent instructions | `docs/governance/documentation-standards.md` |
 | Screenshots, recordings, traces, logs, reports, debug dumps, or scratch files | `docs/governance/temp-artifacts.md` |
+| Any task that may change code | `docs/governance/spec-decision-gate.md` |
 | Bug fixes, small behavior tweaks, or direct implementation exceptions | `docs/governance/compact-specs.md` |
 | Spec-first project delivery, implementation handoff, or main-session acceptance | `docs/governance/spec-first-delivery.md` |
 | Ambiguous feature or cross-module change | `docs/governance/spec-workflow.md` |
@@ -83,7 +84,8 @@ Keep this file short. Put detailed rules in `docs/governance/` and use this file
 - New or substantially changed durable docs must declare `language`, `audience`, and `doc_type` near the top.
 - Agent-facing docs use English by default unless a local exception is explicit.
 - Do not duplicate long-lived documentation; keep one source of truth and route to it.
-- Bug fixes and small tweaks use compact specs unless the change is purely mechanical with no behavior, contract, data, UI, test, or governance impact.
+- Run a Spec Decision Gate before any task that may change code.
+- Bug fixes and small tweaks use compact specs unless the change is purely mechanical with no behavior, contract, data, UI, configuration, permissions, security, test, docs, or governance impact.
 - Run a Parallelization Gate before spec implementation; prefer independent workstreams and record serial exceptions.
 - Subagents or worker sessions implement spec work; the main session accepts it.
 - Do not skip tests or validation silently. Record what ran and what did not.
@@ -188,7 +190,7 @@ Use this loop for all non-trivial engineering work:
 Plan -> Develop -> Verify -> Fix
 ```
 
-1. Plan: read the relevant governance docs, create or update the spec, identify risk, and choose the smallest coherent task shape.
+1. Plan: read the relevant governance docs, run the Spec Decision Gate, create or update the spec when required, identify risk, and choose the smallest coherent task shape.
 2. Develop: run the Parallelization Gate, then hand implementation to subagents or worker sessions through `docs/governance/spec-first-delivery.md`. When TDD applies, use `docs/governance/tdd-workflow.md` inside this phase.
 3. Verify: the worker runs narrow validation, then the main session verifies and broadens when behavior or shared contracts changed. When TDD applies, the broaden/validate/record steps come from `docs/governance/tdd-workflow.md`.
 4. Fix: respond to failing tests, review feedback, or validation gaps. If reality changed, update specs or governance docs before repeating Develop/Verify.
@@ -199,25 +201,28 @@ TDD is not a competing workflow. It is the inner loop used inside Develop and Ve
 
 1. Read `AGENTS.md`.
 2. Read the workflow file that matches the task.
-3. Create or update the relevant spec before implementation, unless an explicit tiny or emergency exception applies.
-4. Run the Parallelization Gate, split work into independent workstreams when practical, and hand implementation to subagents or worker sessions.
-5. If adding or expanding project surface, apply `docs/governance/change-gate.md`.
-6. For code changes, apply `docs/governance/code-quality.md`.
-7. For docs, examples, generated docs, specs, contributor guidance, or agent instructions, apply `docs/governance/documentation-standards.md`.
-8. If producing temporary artifacts, apply `docs/governance/temp-artifacts.md`.
-9. Make the smallest coherent change in the worker/subagent pass.
-10. Run the narrowest meaningful validation first.
-11. Return a worker completion report.
-12. Main session reviews, validates, and accepts before marking the spec ready-review or done.
-13. Record tests run, docs checked, tests skipped, and residual risk.
+3. Run `docs/governance/spec-decision-gate.md` before code-changing work.
+4. Create or update the relevant spec before implementation, unless an explicit tiny or emergency exception applies.
+5. Run the Parallelization Gate, split work into independent workstreams when practical, and hand implementation to subagents or worker sessions.
+6. If adding or expanding project surface, apply `docs/governance/change-gate.md`.
+7. For code changes, apply `docs/governance/code-quality.md`.
+8. For docs, examples, generated docs, specs, contributor guidance, or agent instructions, apply `docs/governance/documentation-standards.md`.
+9. If producing temporary artifacts, apply `docs/governance/temp-artifacts.md`.
+10. Make the smallest coherent change in the worker/subagent pass.
+11. Run the narrowest meaningful validation first.
+12. Return a worker completion report.
+13. Main session reviews, validates, and accepts before marking the spec ready-review or done.
+14. Record tests run, docs checked, tests skipped, and residual risk.
 
 ## Direct Implementation Exceptions
 
-Direct main-session implementation is an exception. Use it only for emergency fixes, unavailable subagent tooling with an explicit note, or tiny mechanical changes with no behavior, contract, or governance effect.
+Direct main-session implementation is an exception. Use it only for emergency fixes, unavailable subagent tooling with an explicit note, or tiny mechanical changes with no behavior, contract, data, UI, configuration, permissions, security, test, docs, or governance impact.
 
 ## Spec-Driven Implementation
 
 Use `docs/governance/spec-workflow.md` when behavior is ambiguous, user-visible, cross-module, or high risk.
+
+Use `docs/governance/spec-decision-gate.md` before deciding that implementation can begin without a spec update.
 
 Use `docs/governance/spec-first-delivery.md` for the fixed coordinator -> worker -> acceptance flow.
 """
@@ -530,6 +535,61 @@ Use `.out/` by default:
 """
 
 
+SPEC_DECISION_GATE = """---
+language: en-US
+audience: agent
+doc_type: normative
+---
+
+# Spec Decision Gate
+
+Use this gate before any task that may change code.
+
+## Rule
+
+Code changes must not start until the main session explicitly chooses one spec path:
+
+- Create a new full spec.
+- Update an existing spec.
+- Create or update a compact spec.
+- Record a direct implementation exception.
+- Confirm no code change is needed.
+
+## Gate
+
+Record the decision in `STATUS.md` when a spec exists. For a direct implementation exception, record it in the handoff, PR, or implementation log.
+
+```markdown
+## Spec Decision Gate
+
+- Request:
+- Code change expected: yes/no
+- Existing spec:
+- Decision: new-full-spec / update-existing-spec / compact-spec / direct-exception / no-code-change
+- Reason:
+- Behavior, contract, data, UI, configuration, permissions, security, test, docs, or governance impact:
+- Next workflow:
+- Recorded in:
+```
+
+## Decision Rules
+
+Create a new full spec when behavior is new, ambiguous, user-visible, cross-module, high-risk, or affects public contracts, persistence, permissions, security, billing, migration, or agent workflows.
+
+Update an existing spec when the request changes, extends, narrows, or corrects accepted product or technical intent. If implementation reveals that the spec no longer matches reality, stop and update the spec before continuing.
+
+Create or update a compact spec for bug fixes and small tweaks that affect behavior, contracts, UI, data, configuration, permissions, security, tests, docs, or governance.
+
+Use a direct implementation exception only for purely mechanical changes with no behavior, contract, data, UI, configuration, permissions, security, test, docs, or governance impact. Record the exception before editing.
+
+Confirm `no-code-change` when the request is explanation, research, triage, or planning only.
+
+## Ordering
+
+Run this gate before `spec-production`, `compact-specs`, `spec-first-delivery`, `tdd-workflow`, and implementation handoff.
+"""
+
+
 COMPACT_SPECS = """---
 language: en-US
 audience: agent
@@ -538,13 +598,13 @@ doc_type: normative
 
 # Compact Specs
 
-Use compact specs for bug fixes and small behavior tweaks. They keep spec-first delivery lightweight while preserving intent, boundaries, and validation evidence.
+Use compact specs when the Spec Decision Gate classifies a bug fix or small behavior tweak as too small for a full feature spec but too meaningful for direct implementation.
 
 ## Rule
 
-Bug fixes and small tweaks still use spec-first when they affect behavior, contracts, UI, data, configuration, permissions, tests, or governance.
+Bug fixes and small tweaks still use spec-first when they affect behavior, contracts, UI, data, configuration, permissions, security, tests, docs, or governance.
 
-Use a direct implementation exception only for purely mechanical changes with no behavior, contract, data, UI, test, or governance effect.
+Use a direct implementation exception only for purely mechanical changes with no behavior, contract, data, UI, configuration, permissions, security, test, docs, or governance impact.
 
 ## Shape
 
@@ -670,7 +730,7 @@ New narrow behavior.
 
 ## Direct Implementation Exception
 
-Do not create a full spec only when the change is purely mechanical. Record the exception in the handoff, PR, or implementation log:
+Use a direct implementation exception only when the change is purely mechanical. Record the exception in the handoff, PR, or implementation log before editing:
 
 ```markdown
 ## Direct Implementation Exception
@@ -678,7 +738,7 @@ Do not create a full spec only when the change is purely mechanical. Record the 
 - Reason: tiny mechanical change
 - Behavior impact: none
 - Contract impact: none
-- Data/UI/test/governance impact: none
+- Data/UI/config/permissions/security/test/docs/governance impact: none
 - Files:
 - Validation:
 - Main-session acceptance:
@@ -707,12 +767,15 @@ doc_type: normative
 
 Project delivery is spec first by default. The main session owns intent, coordination, and acceptance. Implementation is parallel-first: before work starts, the main session must run a Parallelization Gate and prefer independent workstreams delegated to subagents or worker sessions. Tiny mechanical changes and emergency fixes may use direct implementation only when the exception is explicitly recorded.
 
+Run `docs/governance/spec-decision-gate.md` before this workflow to decide whether the task needs a new spec, an existing spec update, a compact spec, or a direct implementation exception.
+
 Use `docs/governance/compact-specs.md` for bug fixes and small tweaks that need a thin spec rather than a full feature spec.
 
 ## Fixed Flow
 
 ```text
 main session intake
+-> Spec Decision Gate
 -> PRODUCT.md
 -> TECH.md
 -> Parallelization Gate
@@ -831,9 +894,9 @@ Implementation cannot start until the spec has:
 
 ## Exceptions
 
-Direct main-session implementation is allowed only for emergency fixes, unavailable subagent tooling with an explicit note, or tiny mechanical changes with no behavior, contract, or governance effect. Even then, run a separate acceptance pass before marking work complete.
+Direct main-session implementation is allowed only for emergency fixes, unavailable subagent tooling with an explicit note, or tiny mechanical changes with no behavior, contract, data, UI, configuration, permissions, security, test, docs, or governance impact. Even then, run a separate acceptance pass before marking work complete.
 
-Bug fixes and small tweaks are not direct-implementation exceptions by default. If they affect behavior, contracts, UI, data, configuration, permissions, tests, or governance, create a compact spec.
+Bug fixes and small tweaks are not direct-implementation exceptions by default. If they affect behavior, contracts, UI, data, configuration, permissions, security, tests, docs, or governance, create a compact spec.
 """
 
 
@@ -847,6 +910,8 @@ doc_type: normative
 
 ## When To Write A Spec
 
+Run `docs/governance/spec-decision-gate.md` before any task that may change code.
+
 Write a spec before implementation when at least one is true:
 
 - Behavior is ambiguous or user-visible.
@@ -855,7 +920,7 @@ Write a spec before implementation when at least one is true:
 - A coding agent needs stable product intent before implementation.
 - Reviewers need to approve direction before code churn begins.
 
-Use `docs/governance/compact-specs.md` for bug fixes and small behavior tweaks. Skip full specs only for direct implementation exceptions: purely mechanical changes with no behavior, contract, data, UI, test, or governance effect.
+Use `docs/governance/compact-specs.md` for bug fixes and small behavior tweaks. Skip full specs only for direct implementation exceptions: purely mechanical changes with no behavior, contract, data, UI, configuration, permissions, security, test, docs, or governance impact.
 
 Before implementation, run the Parallelization Gate. Prefer independent workstreams and implementation agents for non-trivial specs. Use one serial workstream only when the task is atomic, highly conflict-prone, blocked on unresolved shared contracts, an explicit tiny or emergency exception, or cheaper to complete directly than to coordinate.
 
@@ -900,14 +965,14 @@ doc_type: normative
 
 # Spec Production
 
-Use this workflow when turning a fuzzy request, issue, or product idea into a repo-native spec.
+Use this workflow after the Spec Decision Gate chooses a new or revised repo-native spec.
 
 Use `docs/governance/compact-specs.md` when the request is a bug fix or small tweak.
 
 ## Flow
 
 ```text
-intake -> clarify -> classify -> assign spec id -> PRODUCT -> behavior review -> code inspection -> TECH -> parallelization gate -> STATUS/workstreams -> validation plan -> draft or ready
+spec decision gate -> intake -> clarify -> classify -> assign spec id -> PRODUCT -> behavior review -> code inspection -> TECH -> parallelization gate -> STATUS/workstreams -> validation plan -> draft or ready
 ```
 
 ## Clarify Before Writing
@@ -1069,11 +1134,28 @@ specs/<spec-id>/
     01-implementation.md
 ```
 
-`STATUS.md` is the global board. It records the overall lifecycle, the Parallelization Gate, implementation progress, validation progress, and a summary table of workstreams.
+`STATUS.md` is the global board. It records the overall lifecycle, the Spec Decision Gate, the Parallelization Gate, implementation progress, validation progress, and a summary table of workstreams.
 
 `workstreams/*.md` files are the concurrency unit. Agents should primarily update their own workstream file and synchronize only their row in `STATUS.md`.
 
 Use `docs/governance/multi-agent-spec-flow.md` when multiple agents or branches implement the same spec in parallel.
+
+## Spec Decision Gate
+
+When a spec exists or is being created, `STATUS.md` should record the decision that made code-changing work eligible to proceed:
+
+```markdown
+## Spec Decision Gate
+
+- Request:
+- Code change expected: yes/no
+- Existing spec:
+- Decision: new-full-spec / update-existing-spec / compact-spec / direct-exception / no-code-change
+- Reason:
+- Behavior, contract, data, UI, configuration, permissions, security, test, docs, or governance impact:
+- Next workflow:
+- Recorded in:
+```
 
 ## Parallelization Gate
 
@@ -1408,6 +1490,7 @@ doc_type: normative
 - Check `docs/governance/code-quality.md` for structural code-quality issues.
 - Check `docs/governance/documentation-standards.md` when docs, examples, generated docs, specs, contributor guidance, or agent instructions changed.
 - Check `docs/governance/temp-artifacts.md` when temporary outputs were produced.
+- Check `docs/governance/spec-decision-gate.md` for code-changing work.
 - Check `docs/governance/spec-first-delivery.md` when implementation was delegated to subagents or worker sessions.
 - Include validation evidence.
 - Call out risks, migrations, and follow-ups.
@@ -1483,7 +1566,7 @@ doc_type: router
 
 # Specs
 
-Use `docs/governance/spec-first-delivery.md` for the fixed coordinator -> worker -> acceptance flow, `docs/governance/compact-specs.md` for bug fix and small tweak specs, `docs/governance/spec-production.md` for creating specs, `docs/governance/spec-workflow.md` for the spec lifecycle, `docs/governance/spec-id-policy.md` for id format, `docs/governance/spec-execution-status.md` for execution status, and `docs/governance/multi-agent-spec-flow.md` for parallel implementation.
+Use `docs/governance/spec-decision-gate.md` before code-changing work, `docs/governance/spec-first-delivery.md` for the fixed coordinator -> worker -> acceptance flow, `docs/governance/compact-specs.md` for bug fix and small tweak specs, `docs/governance/spec-production.md` for creating specs, `docs/governance/spec-workflow.md` for the spec lifecycle, `docs/governance/spec-id-policy.md` for id format, `docs/governance/spec-execution-status.md` for execution status, and `docs/governance/multi-agent-spec-flow.md` for parallel implementation.
 
 Each substantial spec should live under:
 
@@ -1534,6 +1617,7 @@ Product spec: `./PRODUCT.md`
 
 ## Workstream Plan
 
+- Spec Decision Gate:
 - Parallelization Gate:
 - Workstreams:
 - Serial exception, if any:
@@ -1561,6 +1645,17 @@ updated: YYYY-MM-DD
 ## Summary
 
 Implementation has not started.
+
+## Spec Decision Gate
+
+- Request:
+- Code change expected: yes/no
+- Existing spec:
+- Decision:
+- Reason:
+- Behavior, contract, data, UI, configuration, permissions, security, test, docs, or governance impact:
+- Next workflow:
+- Recorded in:
 
 ## Parallelization Gate
 
@@ -1654,6 +1749,7 @@ doc_type: template
 
 ## Spec
 
+- Spec Decision Gate:
 - Spec:
 - Compact spec or direct exception:
 - Spec-first workflow used:
@@ -2034,6 +2130,7 @@ def planned_files(root: Path, suite: str, tdd: str, spec_id: str) -> list[tuple[
         (root / "docs" / "governance" / "code-quality.md", CODE_QUALITY),
         (root / "docs" / "governance" / "documentation-standards.md", DOCUMENTATION_STANDARDS),
         (root / "docs" / "governance" / "temp-artifacts.md", TEMP_ARTIFACTS),
+        (root / "docs" / "governance" / "spec-decision-gate.md", SPEC_DECISION_GATE),
         (root / "docs" / "governance" / "compact-specs.md", COMPACT_SPECS),
         (root / "docs" / "governance" / "spec-first-delivery.md", SPEC_FIRST_DELIVERY),
         (root / "docs" / "governance" / "spec-production.md", SPEC_PRODUCTION),

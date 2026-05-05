@@ -24,6 +24,7 @@ Prefer a small number of clear layers:
 - Routed: `AGENTS.md` points to the current workflow files without duplicating them.
 - Documented: docs have a clear source of truth, audience, scope, validation path, and retirement path.
 - Coordinated: active specs use `STATUS.md` and `workstreams/*.md` instead of hidden chat state.
+- Spec-gated: code-changing requests start with a Spec Decision Gate that chooses full spec, existing spec update, compact spec, direct exception, or no-code-change.
 - Structural: code-quality rules require change gates before adding surface and reject dead code, non-orthogonal interfaces, hidden side effects, duplicate business rules, and permanent temporary layers.
 - Contained: temporary artifacts stay in ignored temp locations unless intentionally promoted.
 - Spec-producing: fuzzy requests become specs through clarification, product behavior, code inspection, technical planning, status initialization, and validation handoff.
@@ -55,6 +56,7 @@ Prefer a small number of clear layers:
 - Screenshots, traces, logs, debug dumps, and scratch files appear in repo root or formal docs without promotion.
 - Compatibility layers, feature flags, configs, and TODOs have no owner or deletion condition.
 - Specs are created from implementation guesses before product behavior is clarified.
+- A code-changing request starts implementation before deciding whether to create or update a spec.
 - Bug fixes or small tweaks skip compact specs and lose reproduction, invariant, acceptance, or non-goal context.
 - The main session implements substantial work and then self-accepts it without a separate worker handoff or acceptance pass.
 - Non-trivial specs default to one implementation stream without explaining why parallel workstreams were rejected.

@@ -1,6 +1,6 @@
 # Spec Production
 
-Use this workflow when turning a fuzzy request, issue, or product idea into a repo-native spec.
+Use this workflow after the Spec Decision Gate chooses a new or revised repo-native spec.
 
 ## Principle
 
@@ -9,7 +9,7 @@ Produce stable intent before implementation. A spec is not ready because files e
 ## Flow
 
 ```text
-intake -> clarify -> classify -> assign spec id -> PRODUCT -> behavior review -> code inspection -> TECH -> parallelization gate -> STATUS/workstreams -> validation plan -> draft or ready
+spec decision gate -> intake -> clarify -> classify -> assign spec id -> PRODUCT -> behavior review -> code inspection -> TECH -> parallelization gate -> STATUS/workstreams -> validation plan -> draft or ready
 ```
 
 ## Intake

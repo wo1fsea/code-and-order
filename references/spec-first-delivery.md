@@ -10,6 +10,10 @@ Use this workflow for project work by default. Tiny mechanical changes and
 emergency fixes may use direct implementation only when the exception is
 explicitly recorded.
 
+Run `references/spec-decision-gate.md` before this workflow to decide whether
+the task needs a new spec, an existing spec update, a compact spec, or a direct
+implementation exception.
+
 Use `references/compact-specs.md` for bug fixes and small tweaks that need a
 thin spec rather than a full feature spec.
 
@@ -28,6 +32,7 @@ to review or done.
 
 ```text
 main session intake
+-> Spec Decision Gate
 -> PRODUCT.md
 -> TECH.md
 -> Parallelization Gate
@@ -179,12 +184,12 @@ Direct main-session implementation is allowed only when one is true:
 
 - The change is an emergency fix and delay would be riskier than process.
 - Subagent tooling is unavailable and the exception is recorded.
-- The change is a tiny mechanical update with no behavior, contract, or
-  governance effect.
+- The change is a tiny mechanical update with no behavior, contract, data, UI,
+  configuration, permissions, security, test, docs, or governance impact.
 
 Even with an exception, record the spec/workstream status and run a separate
 acceptance pass before marking the work complete.
 
 Bug fixes and small tweaks are not direct-implementation exceptions by default.
-If they affect behavior, contracts, UI, data, configuration, permissions, tests,
-or governance, create a compact spec.
+If they affect behavior, contracts, UI, data, configuration, permissions,
+security, tests, docs, or governance, create a compact spec.

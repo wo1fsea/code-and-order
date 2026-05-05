@@ -30,6 +30,7 @@ docs/governance/
   code-quality.md
   documentation-standards.md
   temp-artifacts.md
+  spec-decision-gate.md
   compact-specs.md
   spec-first-delivery.md
   spec-production.md
@@ -82,47 +83,51 @@ specs/
    - Treat documentation as project surface with language metadata, one source of truth, clear audience and scope, validation, and stale-doc deletion or supersession.
    - Agent-facing docs should use English by default.
    - Read `references/documentation-standards.md` when README, docs, examples, contributor guidance, generated docs, governance files, specs, or agent instructions are created or changed.
-7. Use spec-first delivery for project work.
+7. Run a Spec Decision Gate before code-changing tasks.
+   - Before implementation, choose one: create a new full spec, update an existing spec, create or update a compact spec, record a direct implementation exception, or confirm no code change is needed.
+   - Code changes must not start until the decision is explicit.
+   - Read `references/spec-decision-gate.md` before treating a requested code change as direct implementation.
+8. Use spec-first delivery for project work.
    - Main session owns intake, spec production, the Parallelization Gate, workstream split, and final acceptance.
    - Prefer independent workstreams and implementation agents for non-trivial project work.
    - Subagents or worker sessions implement claimed workstreams and hand back evidence.
    - Read `references/spec-first-delivery.md` before implementing project work except explicit direct-implementation exceptions.
-8. Use compact specs for bug fixes and small tweaks.
+9. Use compact specs for bug fixes and small tweaks.
    - Bug fixes focus on observed behavior, expected behavior, regression invariant, reproduction, non-goals, and regression validation.
    - Small tweaks focus on current behavior, desired behavior, acceptance, affected surface, and non-goals.
    - Read `references/compact-specs.md` before treating a bug fix, UI copy/default tweak, or narrow behavior adjustment as too small for a spec.
-9. Separate product intent from implementation planning.
+10. Separate product intent from implementation planning.
    - Read `references/spec-production.md` when turning a request into a new or revised spec.
    - `PRODUCT.md`: user/API-visible behavior, testable invariants, goals, non-goals, open questions.
    - `TECH.md`: current code context, proposed changes, validation plan, risks, follow-ups.
-10. Use concrete spec ids.
+11. Use concrete spec ids.
    - Preferred shape: `specs/<source>-<id>-<short-slug>/`.
    - Examples: `gh-123-open-file-tilde`, `linear-app-1066-agent-autonomy`, `rfc-0001-repo-governance`, `adhoc-20260430-tdd-bootstrap`.
    - Read `references/spec-id-policy.md` before inventing a new policy.
-11. Manage execution status explicitly.
+12. Manage execution status explicitly.
    - Do not encode status in directory names.
    - Use `STATUS.md` for the overall spec board and `workstreams/*.md` for parallel execution.
    - Record the Parallelization Gate before implementation starts.
    - Agents claim and update their own workstream files, then synchronize only their row in `STATUS.md`.
    - Read `references/spec-execution-status.md` when a spec has not started, is partially complete, is blocked, or has multiple agents working in parallel.
    - Read `references/multi-agent-spec-flow.md` when multiple agents or branches implement the same spec.
-12. Treat TDD as a workflow, not a slogan.
+13. Treat TDD as a workflow, not a slogan.
    - The outer engineering loop is Plan -> Develop -> Verify -> Fix.
    - TDD is the inner loop inside Develop/Verify: product behavior -> test plan -> red -> green -> refactor -> broaden -> validate -> record.
    - Do not present TDD as a competing workflow.
    - Read `references/tdd-workflow.md` when defining or auditing TDD rules.
-13. Tie every rule to a decision point.
+14. Tie every rule to a decision point.
    - A good rule tells the next human or agent what to do differently.
    - Delete or compress rules that only restate common sense.
-14. Maintain the router.
+15. Maintain the router.
    - When adding, deleting, renaming, or moving governance files, update `AGENTS.md` in the same change.
    - When changing which workflow applies to a task type, update the `AGENTS.md` governance map in the same change.
-15. Track Code & Order provenance.
+16. Track Code & Order provenance.
    - Initialized repos should have `docs/governance/code-and-order.lock.json`.
    - Use `scripts/init_governance.py . --audit` to compare the tracked governance baseline with the running Code & Order templates and latest `main`.
    - Use `--adopt` for repos initialized before lockfiles existed.
    - Use `--update` only for safe refreshes; customized files that also changed upstream require manual merge.
-16. Validate the result.
+17. Validate the result.
    - Confirm links and paths work.
    - Confirm setup/test commands are discoverable.
    - For UI-visible changes, require visual evidence or an explicit not-applicable note.
@@ -164,6 +169,8 @@ Modes:
 
 Project work is spec first by default. Create or update a spec before implementation, then delegate implementation through workstreams to subagents or worker sessions, then perform main-session acceptance.
 
+Every code-changing request starts with a Spec Decision Gate. The main session must decide whether to create a new full spec, update an existing spec, create or update a compact spec, record a direct implementation exception, or confirm that no code change is needed. Code changes must not start until this decision is explicit.
+
 Project work is parallel-first by default. Before implementation, the main session must decide whether the spec can be split into independent workstreams. Use serial implementation only when the task is atomic, highly conflict-prone, blocked on unresolved shared contracts, an explicit tiny or emergency exception, or cheaper to complete directly than to coordinate.
 
 This is required when at least one is true:
@@ -174,7 +181,7 @@ This is required when at least one is true:
 - The implementation will likely be done by an agent that needs stable intent.
 - Reviewers need to approve direction before code churn begins.
 
-Direct main-session implementation is an exception for emergency fixes, unavailable subagent tooling with an explicit note, or tiny mechanical changes with no behavior, contract, or governance effect.
+Direct main-session implementation is an exception for emergency fixes, unavailable subagent tooling with an explicit note, or tiny mechanical changes with no behavior, contract, data, UI, configuration, permissions, security, test, docs, or governance impact.
 
 Bug fixes and small tweaks are not automatically direct-implementation exceptions. Use compact specs for behavior fixes, UI-visible tweaks, defaults, config changes, tests with behavior meaning, docs that change user guidance, and narrow interaction changes.
 
@@ -186,6 +193,7 @@ Bug fixes and small tweaks are not automatically direct-implementation exception
 - Read `references/code-quality.md` when adding concrete code-quality review gates.
 - Read `references/documentation-standards.md` when adding, moving, deleting, auditing, or updating docs, examples, generated docs, contributor guidance, specs, or agent instructions.
 - Read `references/temp-artifacts.md` when managing screenshots, logs, traces, reports, scratch files, or other temporary outputs.
+- Read `references/spec-decision-gate.md` before starting any code-changing task.
 - Read `references/compact-specs.md` when a bug fix or small tweak needs a lightweight spec instead of a full feature spec.
 - Read `references/spec-first-delivery.md` when enforcing the fixed spec-first -> subagent implementation -> main-session acceptance flow.
 - Read `references/spec-production.md` when creating or revising `PRODUCT.md`, `TECH.md`, `STATUS.md`, or workstreams.

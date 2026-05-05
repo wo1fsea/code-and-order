@@ -77,6 +77,7 @@ Product spec: `./PRODUCT.md`
 
 ## Workstream Plan
 
+- Spec Decision Gate:
 - Parallelization Gate:
 - Workstreams:
 - Serial exception, if any:
@@ -123,6 +124,17 @@ updated: YYYY-MM-DD
 # Status
 
 ## Summary
+
+## Spec Decision Gate
+
+- Request:
+- Code change expected: yes/no
+- Existing spec:
+- Decision:
+- Reason:
+- Behavior, contract, data, UI, configuration, permissions, security, test, docs, or governance impact:
+- Next workflow:
+- Recorded in:
 
 ## Parallelization Gate
 
@@ -205,6 +217,8 @@ specs/adhoc-20260430-tdd-bootstrap/
 See `references/spec-id-policy.md` for the full policy.
 
 See `references/spec-execution-status.md` for lifecycle and workstream status rules.
+
+See `references/spec-decision-gate.md` for the pre-implementation spec decision.
 
 See `references/compact-specs.md` for bug fix and small tweak spec templates.
 
