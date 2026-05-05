@@ -25,7 +25,10 @@ specs/<spec-id>/
     04-tests.md
 ```
 
-Use one `01-implementation.md` workstream for small tasks. Split only when parallelism reduces risk or wait time.
+Use one `01-implementation.md` workstream only when the task is atomic, highly
+conflict-prone, blocked on unresolved shared contracts, an explicit tiny or
+emergency exception, or cheaper to complete directly than to coordinate.
+Otherwise, split by ownership or dependency boundary before implementation.
 
 ## Overall Spec Status
 
@@ -50,6 +53,27 @@ The workstream table should summarize, not replace, workstream files:
 | 01 | API contract | in_progress | agent-a | codex/gh-123/01-contract | | 2026-04-30 |
 | 02 | UI flow | blocked | agent-b | codex/gh-123/02-ui | 01 | 2026-04-30 |
 ```
+
+## Parallelization Gate
+
+Before agents claim work, the main session records:
+
+```markdown
+## Parallelization Gate
+
+- Can run in parallel: yes/no
+- Reason:
+- Shared contract needed first: yes/no
+- Workstream split:
+- Sequential dependencies:
+- Conflict risk:
+- Implementation agents to launch:
+- Main-session acceptance checks:
+```
+
+If the gate says `no`, keep one workstream and record the serial exception. If
+the gate says `yes`, each workstream needs clear scope, owned files or modules,
+dependencies, validation expectations, and handoff notes.
 
 ## Workstream Status Machine
 
@@ -129,6 +153,7 @@ Use only what the spec needs:
 03-ui          UI, interaction, visual states
 04-tests       integration, e2e, regression coverage
 05-docs        docs, migration notes, release notes
+06-validation  broad validation, visual evidence, release checks
 ```
 
 ## Integrator Flow

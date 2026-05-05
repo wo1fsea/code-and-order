@@ -16,9 +16,13 @@ thin spec rather than a full feature spec.
 ## Principle
 
 Project delivery is spec first. The main session owns intent and acceptance.
-Implementation work is delegated to subagents or worker sessions through
-claimed workstreams. The main session validates the result before the spec can
-move to review or done.
+Implementation is parallel-first: before work starts, the main session must run
+a Parallelization Gate and prefer independent workstreams delegated to
+subagents or worker sessions. Serial implementation is allowed only when the
+task is atomic, highly conflict-prone, blocked on unresolved shared contracts,
+an explicit tiny or emergency exception, or cheaper to complete directly than
+to coordinate. The main session validates the result before the spec can move
+to review or done.
 
 ## Fixed Flow
 
@@ -26,12 +30,37 @@ move to review or done.
 main session intake
 -> PRODUCT.md
 -> TECH.md
+-> Parallelization Gate
 -> STATUS.md and workstreams
 -> subagent implementation
 -> subagent validation and handoff
 -> main session acceptance
 -> review or done
 ```
+
+## Parallelization Gate
+
+Before implementation starts, record this gate in `STATUS.md`. The handoff may
+repeat the relevant decision, but it does not replace the status record:
+
+```markdown
+## Parallelization Gate
+
+- Can run in parallel: yes/no
+- Reason:
+- Shared contract needed first: yes/no
+- Workstream split:
+- Sequential dependencies:
+- Conflict risk:
+- Implementation agents to launch:
+- Main-session acceptance checks:
+```
+
+Default to parallel workstreams for non-trivial specs. Use one serial
+workstream only when the scope is atomic, the same files would be edited by
+multiple agents, a shared contract must be resolved first, the change is a
+recorded direct-implementation exception, or coordination cost is higher than
+the work itself.
 
 ## Role Boundaries
 
@@ -43,7 +72,9 @@ The main session acts as coordinator and acceptor:
 - Produces or revises the spec before implementation.
 - Confirms `PRODUCT.md` behavior and non-goals.
 - Confirms `TECH.md` is grounded in the current repo.
-- Splits work into workstreams.
+- Runs the Parallelization Gate and records why any serial path is acceptable.
+- Splits work into independent workstreams with clear ownership, dependencies,
+  and validation expectations.
 - Assigns or launches subagents/worker sessions when implementation starts.
 - Reviews changed files and workstream evidence.
 - Runs or delegates broad validation, then verifies the result directly.
@@ -76,6 +107,7 @@ Implementation cannot start until the spec has:
 - `TECH.md` with current code context, proposed change shape, risks, and
   validation plan.
 - `STATUS.md` with `status: ready` or an explicitly accepted `active` state.
+- A recorded Parallelization Gate.
 - At least one workstream with owner, files or scope, dependencies, and
   validation expectations.
 - A main-session handoff note naming the worker/subagent scope.

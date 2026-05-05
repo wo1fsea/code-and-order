@@ -29,6 +29,7 @@ Prefer a small number of clear layers:
 - Spec-producing: fuzzy requests become specs through clarification, product behavior, code inspection, technical planning, status initialization, and validation handoff.
 - Compact: bug fixes and small tweaks use thin specs that preserve observed/expected behavior, invariants, acceptance, and non-goals without feature-spec ceremony.
 - Spec-first: substantial project work starts from a spec, implementation is delegated to subagents or worker sessions, and the main session performs acceptance.
+- Parallel-first: non-trivial specs run a Parallelization Gate before implementation, prefer independent workstreams, and record serial exceptions.
 - Parallel-aware: multi-agent work uses claim, lease, release, blocked, validation, merge, and integrator handoff rules.
 
 ## Common Smells
@@ -56,6 +57,7 @@ Prefer a small number of clear layers:
 - Specs are created from implementation guesses before product behavior is clarified.
 - Bug fixes or small tweaks skip compact specs and lose reproduction, invariant, acceptance, or non-goal context.
 - The main session implements substantial work and then self-accepts it without a separate worker handoff or acceptance pass.
+- Non-trivial specs default to one implementation stream without explaining why parallel workstreams were rejected.
 - Multiple agents edit the same spec or files without claim, lease, dependency, or handoff records.
 
 ## Useful Readiness States

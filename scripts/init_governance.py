@@ -84,6 +84,7 @@ Keep this file short. Put detailed rules in `docs/governance/` and use this file
 - Agent-facing docs use English by default unless a local exception is explicit.
 - Do not duplicate long-lived documentation; keep one source of truth and route to it.
 - Bug fixes and small tweaks use compact specs unless the change is purely mechanical with no behavior, contract, data, UI, test, or governance impact.
+- Run a Parallelization Gate before spec implementation; prefer independent workstreams and record serial exceptions.
 - Subagents or worker sessions implement spec work; the main session accepts it.
 - Do not skip tests or validation silently. Record what ran and what did not.
 - Do not preserve dead code, stale flags, or compatibility paths without an owner and deletion condition.
@@ -188,7 +189,7 @@ Plan -> Develop -> Verify -> Fix
 ```
 
 1. Plan: read the relevant governance docs, create or update the spec, identify risk, and choose the smallest coherent task shape.
-2. Develop: hand implementation to a subagent or worker session through `docs/governance/spec-first-delivery.md`. When TDD applies, use `docs/governance/tdd-workflow.md` inside this phase.
+2. Develop: run the Parallelization Gate, then hand implementation to subagents or worker sessions through `docs/governance/spec-first-delivery.md`. When TDD applies, use `docs/governance/tdd-workflow.md` inside this phase.
 3. Verify: the worker runs narrow validation, then the main session verifies and broadens when behavior or shared contracts changed. When TDD applies, the broaden/validate/record steps come from `docs/governance/tdd-workflow.md`.
 4. Fix: respond to failing tests, review feedback, or validation gaps. If reality changed, update specs or governance docs before repeating Develop/Verify.
 
@@ -199,7 +200,7 @@ TDD is not a competing workflow. It is the inner loop used inside Develop and Ve
 1. Read `AGENTS.md`.
 2. Read the workflow file that matches the task.
 3. Create or update the relevant spec before implementation, unless an explicit tiny or emergency exception applies.
-4. Split work into workstreams and hand implementation to a subagent or worker session.
+4. Run the Parallelization Gate, split work into independent workstreams when practical, and hand implementation to subagents or worker sessions.
 5. If adding or expanding project surface, apply `docs/governance/change-gate.md`.
 6. For code changes, apply `docs/governance/code-quality.md`.
 7. For docs, examples, generated docs, specs, contributor guidance, or agent instructions, apply `docs/governance/documentation-standards.md`.
@@ -704,7 +705,7 @@ doc_type: normative
 
 # Spec-First Delivery
 
-Project delivery is spec first by default. The main session owns intent, coordination, and acceptance. Subagents or worker sessions implement claimed workstreams and hand back evidence. Tiny mechanical changes and emergency fixes may use direct implementation only when the exception is explicitly recorded.
+Project delivery is spec first by default. The main session owns intent, coordination, and acceptance. Implementation is parallel-first: before work starts, the main session must run a Parallelization Gate and prefer independent workstreams delegated to subagents or worker sessions. Tiny mechanical changes and emergency fixes may use direct implementation only when the exception is explicitly recorded.
 
 Use `docs/governance/compact-specs.md` for bug fixes and small tweaks that need a thin spec rather than a full feature spec.
 
@@ -714,12 +715,32 @@ Use `docs/governance/compact-specs.md` for bug fixes and small tweaks that need 
 main session intake
 -> PRODUCT.md
 -> TECH.md
+-> Parallelization Gate
 -> STATUS.md and workstreams
 -> subagent implementation
 -> subagent validation and handoff
 -> main session acceptance
 -> review or done
 ```
+
+## Parallelization Gate
+
+Before implementation starts, record this gate in `STATUS.md`. The handoff may repeat the relevant decision, but it does not replace the status record:
+
+```markdown
+## Parallelization Gate
+
+- Can run in parallel: yes/no
+- Reason:
+- Shared contract needed first: yes/no
+- Workstream split:
+- Sequential dependencies:
+- Conflict risk:
+- Implementation agents to launch:
+- Main-session acceptance checks:
+```
+
+Default to parallel workstreams for non-trivial specs. Use one serial workstream only when the scope is atomic, the same files would be edited by multiple agents, a shared contract must be resolved first, the change is a recorded direct-implementation exception, or coordination cost is higher than the work itself.
 
 ## Main Session
 
@@ -729,7 +750,8 @@ The main session acts as coordinator and acceptor:
 - Produce or revise the spec before implementation.
 - Confirm `PRODUCT.md` behavior and non-goals.
 - Confirm `TECH.md` is grounded in the current repo.
-- Split work into workstreams.
+- Run the Parallelization Gate and record why any serial path is acceptable.
+- Split work into independent workstreams with clear ownership, dependencies, and validation expectations.
 - Assign or launch subagents/worker sessions when implementation starts.
 - Review changed files and workstream evidence.
 - Run broad validation or verify that it was run.
@@ -758,6 +780,7 @@ Implementation cannot start until the spec has:
 - `PRODUCT.md` with observable behavior and non-goals.
 - `TECH.md` with current code context, proposed change shape, risks, and validation plan.
 - `STATUS.md` with `status: ready` or an explicitly accepted `active` state.
+- A recorded Parallelization Gate.
 - At least one workstream with owner, scope, dependencies, and validation expectations.
 - A main-session handoff note naming the worker/subagent scope.
 
@@ -834,6 +857,8 @@ Write a spec before implementation when at least one is true:
 
 Use `docs/governance/compact-specs.md` for bug fixes and small behavior tweaks. Skip full specs only for direct implementation exceptions: purely mechanical changes with no behavior, contract, data, UI, test, or governance effect.
 
+Before implementation, run the Parallelization Gate. Prefer independent workstreams and implementation agents for non-trivial specs. Use one serial workstream only when the task is atomic, highly conflict-prone, blocked on unresolved shared contracts, an explicit tiny or emergency exception, or cheaper to complete directly than to coordinate.
+
 ## Required Files
 
 ```text
@@ -882,7 +907,7 @@ Use `docs/governance/compact-specs.md` when the request is a bug fix or small tw
 ## Flow
 
 ```text
-intake -> clarify -> classify -> assign spec id -> PRODUCT -> behavior review -> code inspection -> TECH -> STATUS/workstreams -> validation plan -> draft or ready
+intake -> clarify -> classify -> assign spec id -> PRODUCT -> behavior review -> code inspection -> TECH -> parallelization gate -> STATUS/workstreams -> validation plan -> draft or ready
 ```
 
 ## Clarify Before Writing
@@ -895,7 +920,8 @@ Ask concise questions when answers would change the spec:
 - What are the success criteria?
 - What failure, empty, loading, permission, cancellation, or rollback paths matter?
 - Which repo pattern and validation weight apply?
-- Does this need one workstream or parallel workstreams?
+- What can be implemented independently?
+- What must be serial, and why?
 
 Do not invent product intent when the answer would affect implementation.
 
@@ -927,6 +953,8 @@ Apply `docs/governance/change-gate.md` before adding new surface.
 
 ## STATUS And Workstreams
 
+Before implementation, run the Parallelization Gate and record the result in `STATUS.md`. Default to independent workstreams for non-trivial specs. Use a single workstream only when the task is atomic, highly conflict-prone, blocked on unresolved shared contracts, an explicit tiny or emergency exception, or cheaper to complete directly than to coordinate.
+
 For incomplete specs:
 
 ```yaml
@@ -953,6 +981,7 @@ workstreams/02-core.md
 workstreams/03-ui.md
 workstreams/04-tests.md
 workstreams/05-docs.md
+workstreams/06-validation.md
 ```
 
 Use `docs/governance/multi-agent-spec-flow.md` when more than one agent may implement work in parallel.
@@ -1040,11 +1069,30 @@ specs/<spec-id>/
     01-implementation.md
 ```
 
-`STATUS.md` is the global board. It records the overall lifecycle, implementation progress, validation progress, and a summary table of workstreams.
+`STATUS.md` is the global board. It records the overall lifecycle, the Parallelization Gate, implementation progress, validation progress, and a summary table of workstreams.
 
 `workstreams/*.md` files are the concurrency unit. Agents should primarily update their own workstream file and synchronize only their row in `STATUS.md`.
 
 Use `docs/governance/multi-agent-spec-flow.md` when multiple agents or branches implement the same spec in parallel.
+
+## Parallelization Gate
+
+Before any workstream is claimed, `STATUS.md` should record:
+
+```markdown
+## Parallelization Gate
+
+- Can run in parallel: yes/no
+- Reason:
+- Shared contract needed first: yes/no
+- Workstream split:
+- Sequential dependencies:
+- Conflict risk:
+- Implementation agents to launch:
+- Main-session acceptance checks:
+```
+
+Default to `yes` for non-trivial specs. Record a serial exception when the task is atomic, highly conflict-prone, blocked on unresolved shared contracts, a tiny or emergency exception, or cheaper to complete directly than to coordinate.
 
 ## Overall Spec Status
 
@@ -1152,6 +1200,27 @@ Workstream = concurrency unit owned by one agent or owner at a time
 Agent = claims and updates one workstream
 Integrator = coordinates conflicts, merge order, and final validation
 ```
+
+Use one `01-implementation.md` workstream only when the task is atomic, highly conflict-prone, blocked on unresolved shared contracts, an explicit tiny or emergency exception, or cheaper to complete directly than to coordinate. Otherwise, split by ownership or dependency boundary before implementation.
+
+## Parallelization Gate
+
+Before agents claim work, the main session records:
+
+```markdown
+## Parallelization Gate
+
+- Can run in parallel: yes/no
+- Reason:
+- Shared contract needed first: yes/no
+- Workstream split:
+- Sequential dependencies:
+- Conflict risk:
+- Implementation agents to launch:
+- Main-session acceptance checks:
+```
+
+If the gate says `no`, keep one workstream and record the serial exception. If the gate says `yes`, each workstream needs clear scope, owned files or modules, dependencies, validation expectations, and handoff notes.
 
 ## Workstream Status Machine
 
@@ -1463,6 +1532,12 @@ Product spec: `./PRODUCT.md`
 
 ## Proposed Changes
 
+## Workstream Plan
+
+- Parallelization Gate:
+- Workstreams:
+- Serial exception, if any:
+
 ## Testing and Validation
 
 ## Risks and Follow-ups
@@ -1486,6 +1561,17 @@ updated: YYYY-MM-DD
 ## Summary
 
 Implementation has not started.
+
+## Parallelization Gate
+
+- Can run in parallel: yes/no
+- Reason:
+- Shared contract needed first: yes/no
+- Workstream split:
+- Sequential dependencies:
+- Conflict risk:
+- Implementation agents to launch:
+- Main-session acceptance checks:
 
 ## Workstreams
 

@@ -83,7 +83,8 @@ specs/
    - Agent-facing docs should use English by default.
    - Read `references/documentation-standards.md` when README, docs, examples, contributor guidance, generated docs, governance files, specs, or agent instructions are created or changed.
 7. Use spec-first delivery for project work.
-   - Main session owns intake, spec production, workstream split, and final acceptance.
+   - Main session owns intake, spec production, the Parallelization Gate, workstream split, and final acceptance.
+   - Prefer independent workstreams and implementation agents for non-trivial project work.
    - Subagents or worker sessions implement claimed workstreams and hand back evidence.
    - Read `references/spec-first-delivery.md` before implementing project work except explicit direct-implementation exceptions.
 8. Use compact specs for bug fixes and small tweaks.
@@ -101,6 +102,7 @@ specs/
 11. Manage execution status explicitly.
    - Do not encode status in directory names.
    - Use `STATUS.md` for the overall spec board and `workstreams/*.md` for parallel execution.
+   - Record the Parallelization Gate before implementation starts.
    - Agents claim and update their own workstream files, then synchronize only their row in `STATUS.md`.
    - Read `references/spec-execution-status.md` when a spec has not started, is partially complete, is blocked, or has multiple agents working in parallel.
    - Read `references/multi-agent-spec-flow.md` when multiple agents or branches implement the same spec.
@@ -161,6 +163,8 @@ Modes:
 ## Spec-First Default
 
 Project work is spec first by default. Create or update a spec before implementation, then delegate implementation through workstreams to subagents or worker sessions, then perform main-session acceptance.
+
+Project work is parallel-first by default. Before implementation, the main session must decide whether the spec can be split into independent workstreams. Use serial implementation only when the task is atomic, highly conflict-prone, blocked on unresolved shared contracts, an explicit tiny or emergency exception, or cheaper to complete directly than to coordinate.
 
 This is required when at least one is true:
 

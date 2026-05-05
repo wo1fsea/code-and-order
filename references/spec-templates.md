@@ -75,6 +75,12 @@ Product spec: `./PRODUCT.md`
 - New types, files, state, data flow, or migration steps.
 - Tradeoffs and why this shape fits the repo.
 
+## Workstream Plan
+
+- Parallelization Gate:
+- Workstreams:
+- Serial exception, if any:
+
 ## Testing and Validation
 
 - Behavior 1 -> automated test or manual validation.
@@ -117,6 +123,17 @@ updated: YYYY-MM-DD
 # Status
 
 ## Summary
+
+## Parallelization Gate
+
+- Can run in parallel: yes/no
+- Reason:
+- Shared contract needed first: yes/no
+- Workstream split:
+- Sequential dependencies:
+- Conflict risk:
+- Implementation agents to launch:
+- Main-session acceptance checks:
 
 ## Workstreams
 

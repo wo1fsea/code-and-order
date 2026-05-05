@@ -4,12 +4,12 @@ Use this workflow when turning a fuzzy request, issue, or product idea into a re
 
 ## Principle
 
-Produce stable intent before implementation. A spec is not ready because files exist; it is ready when behavior, implementation context, status, ownership, and validation are clear enough for a human or agent to execute.
+Produce stable intent before implementation. A spec is not ready because files exist; it is ready when behavior, implementation context, parallelization, status, ownership, and validation are clear enough for a human or agent to execute.
 
 ## Flow
 
 ```text
-intake -> clarify -> classify -> assign spec id -> PRODUCT -> behavior review -> code inspection -> TECH -> STATUS/workstreams -> validation plan -> draft or ready
+intake -> clarify -> classify -> assign spec id -> PRODUCT -> behavior review -> code inspection -> TECH -> parallelization gate -> STATUS/workstreams -> validation plan -> draft or ready
 ```
 
 ## Intake
@@ -32,7 +32,8 @@ Ask concise questions when answers would change the spec:
 - What are the success criteria?
 - What failure, empty, loading, permission, cancellation, or rollback paths matter?
 - Which repo pattern and validation weight apply?
-- Does this need one workstream or parallel workstreams?
+- What can be implemented independently?
+- What must be serial, and why?
 
 Do not invent product intent when the answer would affect implementation.
 
@@ -117,7 +118,7 @@ Required sections:
 - Proposed changes.
 - Touched files or modules.
 - Contract, data, config, dependency, and migration impact.
-- Workstream split when parallel work is useful.
+- Parallelization Gate result and workstream split, including any serial exception.
 - Testing and validation.
 - Risks and follow-ups.
 
@@ -126,6 +127,12 @@ Apply `references/change-gate.md` before adding new surface.
 ## Initialize STATUS.md And Workstreams
 
 Use `references/spec-execution-status.md` for status values.
+
+Before implementation, run the Parallelization Gate and record the result in
+`STATUS.md`. Default to independent workstreams for non-trivial specs. Use a
+single workstream only when the task is atomic, highly conflict-prone, blocked
+on unresolved shared contracts, an explicit tiny or emergency exception, or
+cheaper to complete directly than to coordinate.
 
 For incomplete specs:
 
@@ -157,6 +164,7 @@ workstreams/02-core.md
 workstreams/03-ui.md
 workstreams/04-tests.md
 workstreams/05-docs.md
+workstreams/06-validation.md
 ```
 
 Use `references/spec-first-delivery.md` before implementation handoff.
